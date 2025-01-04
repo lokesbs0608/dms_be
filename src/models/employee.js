@@ -20,6 +20,8 @@ const employeeSchema = new mongoose.Schema(
         section: { type: String, required: true }, // e.g., Delivery, Warehouse, etc.
         account_id: { type: mongoose.Schema.Types.ObjectId, ref: "Account" }, // Reference to Account
         documents_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }], // References Documents
+        branch_id: { type: mongoose.Schema.Types.ObjectId, ref: "Branch" },
+        hub_id: { type: mongoose.Schema.Types.ObjectId, ref: "Hub" }
     },
     { timestamps: true }
 

@@ -13,12 +13,10 @@ const createEmployee = async (req, res) => {
 
             // If a super_admin already exists, check if the current user is a super_admin
             if (existingSuperAdmin && req?.user?.role !== "super_admin") {
-                return res
-                    .status(403)
-                    .json({
-                        message:
-                            "Access Denied. Only Super Admin can create another Super Admin.",
-                    });
+                return res.status(403).json({
+                    message:
+                        "Access Denied. Only Super Admin can create another Super Admin.",
+                });
             }
         }
 
@@ -51,12 +49,11 @@ const updateEmployee = async (req, res) => {
         const { id } = req.params;
         const updatedData = req.body;
 
-        if (req.user.role !== "super_admin") {
-            return res
-                .status(403)
-                .json({
-                    message: "Access Denied. Only Super Admin can update an employee.",
-                });
+        if (req.user.role !== "super_admin" && req.user.role != "admin") {
+            return res.status(403).json({
+                message:
+                    "Access Denied. Only Super Admin or Admin can update an employee.",
+            });
         }
 
         const employee = await Employee.findByIdAndUpdate(
@@ -80,6 +77,12 @@ const deleteEmployee = async (req, res) => {
     try {
         const { id } = req.params;
         const employee = await Employee.findByIdAndDelete(id);
+        if (req.user.role !== "super_admin" && req.user.role != "admin") {
+            return res.status(403).json({
+                message:
+                    "Access Denied. Only Super Admin or Admin can update an employee.",
+            });
+        }
         if (!employee)
             return res.status(404).json({ message: "Employee not found" });
         res.status(200).json({ message: "Employee deleted successfully" });
@@ -91,9 +94,14 @@ const deleteEmployee = async (req, res) => {
 
 // Get Employee by ID
 const getEmployeeById = async (req, res) => {
+    if (req.user.role !== "super_admin" && req.user.role !== "admin") {
+        return res.status(403).json({
+            message: "Access Denied. Only Super Admin or Admin can view an employee.",
+        });
+    }
     try {
         const { id } = req.params;
-        const employee = await Employee.findById(id);
+        const employee = await Employee.findById(id).select("-password"); // Exclude password
         if (!employee)
             return res.status(404).json({ message: "Employee not found" });
         res.status(200).json({ employee });
@@ -103,10 +111,41 @@ const getEmployeeById = async (req, res) => {
     }
 };
 
-// Get All Employees
-const getAllEmployees = async (req, res) => {
+const getFilteredEmployees = async (req, res) => {
+    // Check if the user has sufficient role to view employees
+    if (req.user.role !== "super_admin" && req.user.role !== "admin") {
+        return res.status(403).json({
+            message: "Access Denied. Only Super Admin or Admin can view employees.",
+        });
+    }
+
     try {
-        const employees = await Employee.find();
+        const filters = {};
+
+        // Extract query parameters for filtering
+        const { branch_id, hub_id, date_of_joining, role, section, gender } =
+            req.query;
+
+        // Add the query filters based on the provided query parameters
+        if (branch_id) filters.branch_id = branch_id;
+        if (hub_id) filters.hub_id = hub_id;
+        if (date_of_joining)
+            filters.date_of_joining = { $gte: new Date(date_of_joining) }; // Greater than or equal to the provided date
+        if (role) filters.role = role;
+        if (section) filters.section = section;
+        if (gender) filters.gender = gender;
+
+        // Query the Employee collection with the constructed filters
+        const employees = await Employee.find(filters).select("-password"); // Exclude password
+
+        // If no employees are found
+        if (employees.length === 0) {
+            return res
+                .status(404)
+                .json({ message: "No employees found with the provided filters." });
+        }
+
+        // Respond with the filtered employees
         res.status(200).json({ employees });
     } catch (error) {
         console.error(error);
@@ -119,5 +158,5 @@ module.exports = {
     updateEmployee,
     deleteEmployee,
     getEmployeeById,
-    getAllEmployees,
+    getFilteredEmployees,
 };

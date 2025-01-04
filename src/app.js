@@ -4,7 +4,9 @@ const dotenv = require("dotenv");
 const Employee = require("./models/employee");
 const db = require("./config/db");
 
-// routes
+// routes imports
+const authRoutes = require("./routes/authRoutes");
+const employeeRoutes = require("./routes/employeeRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 
 dotenv.config();
@@ -26,6 +28,9 @@ app.get("/", (req, res) => {
     res.send("API is running...");
 });
 
+// routes
+app.use("/api/auth", authRoutes);
+app.use("/api/employees", employeeRoutes);
 app.use("/api/orders", orderRoutes);
 
 module.exports = app;

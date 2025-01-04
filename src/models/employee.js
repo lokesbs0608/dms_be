@@ -4,6 +4,9 @@ const employeeSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
+        username: { type: String, required: true, unique: true }, // New field for username
+        email: { type: String, required: true, unique: true },
+        password: { type: String, required: true }, // New field for password
         role: { type: String, required: true }, // e.g., Admin, Manager, Delivery Agent
         date_of_joining: { type: Date, default: Date.now },
         location: {
@@ -18,6 +21,20 @@ const employeeSchema = new mongoose.Schema(
         documents_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }], // References Documents
     },
     { timestamps: true }
+
 );
+// Password hashing before saving
+employeeSchema.pre('save', async function (next) {
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, 10);
+    }
+    next();
+});
+
+// Password comparison method
+employeeSchema.methods.comparePassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
+
 
 module.exports = mongoose.model("Employee", employeeSchema);

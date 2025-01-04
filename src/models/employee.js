@@ -21,7 +21,9 @@ const employeeSchema = new mongoose.Schema(
         account_id: { type: mongoose.Schema.Types.ObjectId, ref: "Account" }, // Reference to Account
         documents_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }], // References Documents
         branch_id: { type: mongoose.Schema.Types.ObjectId, ref: "Branch" },
-        hub_id: { type: mongoose.Schema.Types.ObjectId, ref: "Hub" }
+        hub_id: { type: mongoose.Schema.Types.ObjectId, ref: "Hub" },
+        created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
+        updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     },
     { timestamps: true }
 

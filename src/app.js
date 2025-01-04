@@ -13,6 +13,8 @@ const documentRoutes = require("./routes/documentRoutes");
 const accountRoutes = require("./routes/accountRoutes");
 const branchRoutes = require("./routes/branchRoutes");
 const customerRoutes = require("./routes/customerRoutes");
+const loaderRoutes = require("./routes/loaderController");
+const vehicleRoutes = require("./routes/vehicleRoutes")
 
 dotenv.config();
 
@@ -50,7 +52,8 @@ app.use("/api/document", documentRoutes);
 app.use("/api/account", accountRoutes);
 app.use("/api/branch", branchRoutes);
 app.use("/api/customer", customerRoutes);
-
+app.use("/api/loader", loaderRoutes)
+app.use("/api/vehicle", vehicleRoutes)
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

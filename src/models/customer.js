@@ -5,7 +5,7 @@ const contactSchema = new mongoose.Schema({
     name: { type: String, required: true },
     number: { type: String, required: true },
     email: { type: String, required: false },
-    type: { type: String, enum: ["Personal", "Business","Emergency"], required: true },
+    type: { type: String, enum: ["Personal", "Business", "Emergency"], required: true },
 });
 
 const customerSchema = new mongoose.Schema(
@@ -21,6 +21,8 @@ const customerSchema = new mongoose.Schema(
         type: { type: String, default: "customer" },
         username: { type: String, required: true, unique: true },
         password: { type: String, required: true },
+        created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
+        updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     },
     { timestamps: true }
 );

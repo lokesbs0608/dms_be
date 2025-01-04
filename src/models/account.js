@@ -10,6 +10,8 @@ const accountSchema = new mongoose.Schema(
         verified: { type: Boolean, default: false },
         status: { type: String, enum: ["Active", "Archived"], default: "Active" }, // Archived status
         archived_at: { type: Date }, // Timestamp when the account was archived
+        created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
+        updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     },
     { timestamps: true }
 );

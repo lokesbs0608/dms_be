@@ -5,7 +5,7 @@ const hubSchema = new mongoose.Schema(
         name: { type: String, required: true },
         address: { type: String, required: true },
         documents_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }],
-        bank_details_id: { type: mongoose.Schema.Types.ObjectId, ref: "BankDetails" },
+        bank_details_id: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
         manager_id: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
         emergency_person_id: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
         landline_number: { type: String, required: true },

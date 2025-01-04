@@ -7,16 +7,15 @@ const db = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
 const orderRoutes = require("./routes/orderRoutes");
-const hubRoutes = require("./routes/hubRoutes")
+const hubRoutes = require("./routes/hubRoutes");
+const documentRoutes = require("./routes/documentRoutes");
+const accountRoutes = require("./routes/accountRoutes");
 
 dotenv.config();
-
-
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-
 
 const PORT = process.env.PORT || 5000; // Default port is 5000 if not set in environment variables
 
@@ -24,7 +23,6 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 db();
-
 
 // Test Route
 app.get("/", (req, res) => {
@@ -35,6 +33,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/orders", orderRoutes);
-app.use('/api/hub', hubRoutes)
+app.use("/api/hub", hubRoutes);
+app.use("/api/document", documentRoutes);
+app.unsubscribe("/api/account", accountRoutes);
 
 module.exports = app;

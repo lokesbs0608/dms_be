@@ -1,5 +1,4 @@
-const Hub = require("../models/hub");
-const Employee = require("../models/employee");
+const Hub = require("../models/hub");;
 
 // Create Hub
 const createHub = async (req, res) => {
@@ -122,6 +121,13 @@ const deleteHub = async (req, res) => {
 
 // Get Hub by ID
 const getHubById = async (req, res) => {
+    // Check if the user has sufficient role to view employees
+    if (req.user.role !== "super_admin" && req.user.role !== "admin") {
+        return res.status(403).json({
+            message: "Access Denied.",
+        });
+    }
+
     try {
         const { id } = req.params;
 
@@ -132,6 +138,7 @@ const getHubById = async (req, res) => {
 
         const hub = await Hub.findById(id)
             .populate("documents_id")
+            .populate("bank_details_id")
             .populate("manager_id")
             .populate("emergency_person_id");
 
@@ -147,24 +154,47 @@ const getHubById = async (req, res) => {
     }
 };
 
-// Get All Hubs
+// Get All Hubs with filters
 const getAllHubs = async (req, res) => {
+    // Check if the user has sufficient role to view hubs
+    if (req.user.role !== "super_admin" && req.user.role !== "admin") {
+        return res.status(403).json({
+            message: "Access Denied. Only Super Admin or Admin can view hubs.",
+        });
+    }
+
     try {
-        const hubs = await Hub.find()
+        // Build filter object from query parameters
+        let filter = {};
+
+        // Apply filters based on query parameters
+        if (req.query.branch_id) filter["branch_id"] = req.query.branch_id;
+        if (req.query.hub_code) filter["hub_code"] = req.query.hub_code;
+        if (req.query.division) filter["division"] = req.query.division;
+        if (req.query.status) filter["status"] = req.query.status; // Active or Inactive
+        if (req.query.manager_id) filter["manager_id"] = req.query.manager_id;
+        if (req.query.emergency_person_id) filter["emergency_person_id"] = req.query.emergency_person_id;
+        if (req.query.pincode) filter["pincodes"] = req.query.pincode; // If you want to filter by pincode as well
+
+        // You can extend the filters further based on other fields in your Hub schema
+
+        // Get hubs with populated fields and filter applied
+        const hubs = await Hub.find(filter)
             .populate("documents_id")
             .populate("manager_id")
-            .populate("emergency_person_id");
+            .populate("emergency_person_id")
+            .populate("bank_details_id");
 
         if (!hubs || hubs.length === 0) {
-            return res.status(404).json({ message: "No hubs found" });
+            return res.status(404).json({ message: "No hubs found matching the filters" });
         }
 
         res.status(200).json({ hubs });
     } catch (error) {
-        // Return error message
         console.error(error); // Log the error for debugging
         res.status(500).json({ message: error.message || "Internal Server Error" });
     }
 };
+
 
 module.exports = { createHub, updateHub, deleteHub, getHubById, getAllHubs };

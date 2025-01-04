@@ -10,6 +10,8 @@ const orderRoutes = require("./routes/orderRoutes");
 const hubRoutes = require("./routes/hubRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const accountRoutes = require("./routes/accountRoutes");
+const branchRoutes = require("./routes/branchRoutes");
+const customerRoutes = require("./routes/customerRoutes")
 
 dotenv.config();
 
@@ -35,6 +37,8 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/hub", hubRoutes);
 app.use("/api/document", documentRoutes);
-app.unsubscribe("/api/account", accountRoutes);
+app.use("/api/account", accountRoutes);
+app.use("/api/branch", branchRoutes)
+app.use("/api/customer", customerRoutes)
 
 module.exports = app;

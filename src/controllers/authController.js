@@ -1,8 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const transporter = require("../config/trasnporter");
+const transporter = require("../config/transporter");
 const Employee = require("../models/employee");
-const crypto = require("crypto");
 
 
 
@@ -33,7 +32,7 @@ const login = async (req, res) => {
         const token = jwt.sign(
             { id: employee._id, role: employee.role },
             process.env.JWT_SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "15d" }
         );
 
         res.status(200).json({ message: "Login successful", token });

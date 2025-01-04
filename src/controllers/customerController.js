@@ -47,6 +47,28 @@ const updateCustomer = async (req, res) => {
     }
 };
 
+const getCustomerById = async (req, res) => {
+    try {
+        const { id } = req.params; // Extract ID from the route parameters
+
+        // Fetch the customer by ID and populate any referenced fields if needed
+        const customer = await Customer.findById(id)
+            .populate("account_id") // Populate the account details
+            .populate("documents"); // Populate documents array
+
+        // Check if customer exists
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+
+        // Return customer details
+        res.status(200).json(customer);
+    } catch (error) {
+        console.error("Error fetching customer by ID:", error);
+        res.status(500).json({ message: "An error occurred while fetching the customer." });
+    }
+};
+
 
 const archiveCustomer = async (req, res) => {
     try {
@@ -196,4 +218,4 @@ const loginCustomer = async (req, res) => {
 
 
 
-module.exports = { createCustomer, updateCustomer, loginCustomer, getAllCustomers, resetCustomerPassword, forgotPassword, unarchiveCustomer, archiveCustomer }
+module.exports = { createCustomer, updateCustomer, loginCustomer, getAllCustomers, resetCustomerPassword, forgotPassword, unarchiveCustomer, archiveCustomer ,getCustomerById}

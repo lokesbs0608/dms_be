@@ -11,19 +11,30 @@ const login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
+        // Find employee by username
         const employee = await Employee.findOne({ username });
+
         if (!employee) {
             return res.status(400).json({ message: "Invalid username or password" });
         }
 
+        // Check if employee is active
+        if (employee.status !== "Active") {
+            return res.status(403).json({ message: "Account is inactive or archived. Please contact the administrator." });
+        }
+
+        // Compare password
         const isMatch = await employee.comparePassword(password);
         if (!isMatch) {
             return res.status(400).json({ message: "Invalid username or password" });
         }
 
-        const token = jwt.sign({ id: employee._id, role: employee.role }, process.env.JWT_SECRET, {
-            expiresIn: "1h",
-        });
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: employee._id, role: employee.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
 
         res.status(200).json({ message: "Login successful", token });
     } catch (error) {
@@ -32,13 +43,22 @@ const login = async (req, res) => {
     }
 };
 
+
 // Forgot Password - Sends OTP
 const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
+
+        // Find employee by email
         const employee = await Employee.findOne({ email });
+
         if (!employee) {
             return res.status(404).json({ message: "Employee not found" });
+        }
+
+        // Check if employee is active
+        if (employee.status !== "Active") {
+            return res.status(403).json({ message: "Account is inactive or archived. Please contact the administrator." });
         }
 
         // Generate OTP
@@ -54,7 +74,7 @@ const forgotPassword = async (req, res) => {
 
         await transporter.sendMail(mailOptions);
 
-        // Store OTP in the database (for validation during reset)
+        // Store OTP in the database
         employee.resetOtp = otp;
         employee.resetOtpExpiration = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
         await employee.save();
@@ -66,21 +86,32 @@ const forgotPassword = async (req, res) => {
     }
 };
 
+
 // Reset Password - Validates OTP and Resets Password
 const resetPassword = async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
 
+        // Find employee by email
         const employee = await Employee.findOne({ email });
+
         if (!employee) {
             return res.status(404).json({ message: "Employee not found" });
         }
 
+        // Check if employee is active
+        if (employee.status !== "Active") {
+            return res.status(403).json({ message: "Account is inactive or archived. Please contact the administrator." });
+        }
+
+        // Validate OTP
         if (employee.resetOtp !== otp || Date.now() > employee.resetOtpExpiration) {
             return res.status(400).json({ message: "Invalid or expired OTP" });
         }
 
-        employee.password = newPassword; // Update password
+        // Update password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        employee.password = hashedPassword;
         employee.resetOtp = null; // Clear OTP
         employee.resetOtpExpiration = null; // Clear OTP expiration
         await employee.save();
@@ -91,5 +122,6 @@ const resetPassword = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 module.exports = { login, forgotPassword, resetPassword };

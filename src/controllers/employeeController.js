@@ -72,25 +72,65 @@ const updateEmployee = async (req, res) => {
     }
 };
 
-// Delete Employee
-const deleteEmployee = async (req, res) => {
+// archive Employee
+const archiveEmployee = async (req, res) => {
     try {
         const { id } = req.params;
-        const employee = await Employee.findByIdAndDelete(id);
-        if (req.user.role !== "super_admin" && req.user.role != "admin") {
+
+        // Check for sufficient role
+        if (req.user.role !== "super_admin" && req.user.role !== "admin") {
             return res.status(403).json({
-                message:
-                    "Access Denied. Only Super Admin or Admin can update an employee.",
+                message: "Access Denied. Only Super Admin or Admin can archive an employee.",
             });
         }
-        if (!employee)
+
+        // Update the employee's status to archived
+        const employee = await Employee.findByIdAndUpdate(
+            id,
+            { status: "Inactive" },
+            { new: true }
+        );
+
+        if (!employee) {
             return res.status(404).json({ message: "Employee not found" });
-        res.status(200).json({ message: "Employee deleted successfully" });
+        }
+
+        res.status(200).json({ message: "Employee archived successfully", employee });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message || "Internal Server Error" });
     }
 };
+// unarchive Employee
+const unarchiveEmployee = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check for sufficient role
+        if (req.user.role !== "super_admin" && req.user.role !== "admin") {
+            return res.status(403).json({
+                message: "Access Denied. Only Super Admin or Admin can unarchive an employee.",
+            });
+        }
+
+        // Update the employee's status to active
+        const employee = await Employee.findByIdAndUpdate(
+            id,
+            { status: "Active" },
+            { new: true }
+        );
+
+        if (!employee) {
+            return res.status(404).json({ message: "Employee not found" });
+        }
+
+        res.status(200).json({ message: "Employee unarchived successfully", employee });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message || "Internal Server Error" });
+    }
+};
+
 
 // Get Employee by ID
 const getEmployeeById = async (req, res) => {
@@ -156,7 +196,8 @@ const getFilteredEmployees = async (req, res) => {
 module.exports = {
     createEmployee,
     updateEmployee,
-    deleteEmployee,
+    archiveEmployee,
+    unarchiveEmployee,
     getEmployeeById,
     getFilteredEmployees,
 };

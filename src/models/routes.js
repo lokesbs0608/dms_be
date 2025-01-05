@@ -37,6 +37,8 @@ const routeSchema = new mongoose.Schema(
             type: String, // Destination of the route
             required: true,
         },
+        created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
+        updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     },
     { timestamps: true }
 );

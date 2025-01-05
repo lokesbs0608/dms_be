@@ -1,9 +1,26 @@
 const express = require("express");
-const { createOrder, getOrders } = require("../controllers/orderController");
-
 const router = express.Router();
+const orderController = require("../controllers/orderController"); // Adjust the path accordingly
 
-router.post("/", createOrder);
-router.get("/", getOrders);
+// Create an order
+router.post("/orders", orderController.createOrder);
+
+// Update an order
+router.put("/orders/:orderId", orderController.updateOrder);
+
+// Archive an order
+router.put("/orders/archive/:orderId", orderController.archiveOrder);
+
+// Unarchive an order
+router.put("/orders/unarchive/:orderId", orderController.unarchiveOrder);
+
+// Add history to an order
+router.post("/orders/history/:orderId", orderController.addHistoryToOrder);
+
+// Change order status
+router.put("/orders/status/:orderId", orderController.changeOrderStatus);
+
+// Filter orders
+router.get("/orders", orderController.filterOrders);
 
 module.exports = router;

@@ -35,8 +35,10 @@ const organizationSchema = new mongoose.Schema(
         ],
         bank_id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Account", 
+            ref: "Account",
         },
+        created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
+        updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     },
     { timestamps: true } // Add createdAt and updatedAt timestamps
 );

@@ -100,13 +100,12 @@ const orderSchema = new mongoose.Schema(
         },
         price: { type: Number, required: true },
         item_id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Item",
-          default: null,
+          type: String,
         },
       },
     ],
-
+    direct_to_loader: { type: Boolean, default: false },
+    delivered_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Employee",
@@ -117,10 +116,6 @@ const orderSchema = new mongoose.Schema(
       ref: "Employee",
       default: null,
     },
-
-    // Metadata
-    created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now },
   },
   {
     timestamps: true,

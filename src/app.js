@@ -14,7 +14,9 @@ const accountRoutes = require("./routes/accountRoutes");
 const branchRoutes = require("./routes/branchRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const loaderRoutes = require("./routes/loaderController");
-const vehicleRoutes = require("./routes/vehicleRoutes")
+const vehicleRoutes = require("./routes/vehicleRoutes");
+const routesRoutes = require("./routes/routesRoutes");
+const organizationRoutes = require("./routes/organizationRoutes")
 
 dotenv.config();
 
@@ -52,8 +54,11 @@ app.use("/api/document", documentRoutes);
 app.use("/api/account", accountRoutes);
 app.use("/api/branch", branchRoutes);
 app.use("/api/customer", customerRoutes);
-app.use("/api/loader", loaderRoutes)
-app.use("/api/vehicle", vehicleRoutes)
+app.use("/api/loader", loaderRoutes);
+app.use("/api/vehicle", vehicleRoutes);
+app.use("/api/routes", routesRoutes);
+app.use("/api/organization", organizationRoutes)
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

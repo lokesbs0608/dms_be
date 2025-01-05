@@ -6,6 +6,7 @@ const contactSchema = new mongoose.Schema({
     number: { type: String, required: true },
     email: { type: String, required: false },
     type: { type: String, enum: ["Personal", "Business", "Emergency"], required: true },
+    designation: { type: String, required: true }
 });
 
 const customerSchema = new mongoose.Schema(
@@ -13,12 +14,13 @@ const customerSchema = new mongoose.Schema(
         name: { type: String, required: true },
         address: { type: String, required: true },
         company_name: { type: String, required: true },
-        account_id: { type: mongoose.Schema.Types.ObjectId, ref: "Account", required: true },
+        account_id: { type: mongoose.Schema.Types.ObjectId, ref: "Account", },
         documents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }],
         email: { type: String, required: true, unique: true },
         status: { type: String, enum: ["Active", "Inactive", "Archived"], default: "Active" },
         contacts: [contactSchema],
         type: { type: String, default: "customer" },
+        route_id: { type: mongoose.Schema.Types.ObjectId, ref: "routes" },
         username: { type: String, required: true, unique: true },
         password: { type: String, required: true },
         created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },

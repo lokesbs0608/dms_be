@@ -168,6 +168,7 @@ const getFilteredEmployees = async (req, res) => {
 
         // Add the query filters based on the provided query parameters
         if (branch_id) filters.branch_id = branch_id;
+        if (ref_id) filters.branch_id = ref_id;
         if (hub_id) filters.hub_id = hub_id;
         if (date_of_joining)
             filters.date_of_joining = { $gte: new Date(date_of_joining) }; // Greater than or equal to the provided date

@@ -22,6 +22,8 @@ const employeeSchema = new mongoose.Schema(
         documents_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }], // References Documents
         branch_id: { type: mongoose.Schema.Types.ObjectId, ref: "Branch" },
         hub_id: { type: mongoose.Schema.Types.ObjectId, ref: "Hub" },
+        ref_id: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
+        remarks: { type: String },
         created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
         updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     },

@@ -20,6 +20,8 @@ const loaderSchema = new mongoose.Schema(
         email: { type: String, required: true, unique: true }, // Email for the loader
         username: { type: String, required: true, unique: true }, // Username for login
         password: { type: String, required: true }, // Password for login
+        website: { type: String },
+        tags: [{ type: String }],
         created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
         updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     },

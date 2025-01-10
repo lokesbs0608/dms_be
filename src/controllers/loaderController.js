@@ -44,7 +44,7 @@ const getAllLoaders = async (req, res) => {
         if (name) filter.name = { $regex: name, $options: "i" };
         if (company_name) filter.company_name = { $regex: company_name, $options: "i" };
 
-        const loaders = await Loader.find(filter);
+        const loaders = await Loader.find(filter).select('-password');
         res.status(200).json(loaders);
     } catch (error) {
         console.error(error);
@@ -55,7 +55,7 @@ const getAllLoaders = async (req, res) => {
 // Get Loader by ID
 const getLoaderById = async (req, res) => {
     try {
-        const loader = await Loader.findById(req.params.id);
+        const loader = await Loader.findById(req.params.id).select('-password');
         if (!loader) return res.status(404).json({ message: "Loader not found" });
         res.status(200).json(loader);
     } catch (error) {
@@ -64,17 +64,33 @@ const getLoaderById = async (req, res) => {
     }
 };
 
-// Update Loader
 const updateLoader = async (req, res) => {
     try {
-        const loader = await Loader.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!loader) return res.status(404).json({ message: "Loader not found" });
-        res.status(200).json({ message: "Loader updated successfully", loader });
+        // Create a copy of the request body
+        const updates = { ...req.body };
+
+        // Remove sensitive fields like 'password' if present
+        if (updates.password) {
+            delete updates.password;
+        }
+
+        // Update the loader
+        const loader = await Loader.findByIdAndUpdate(req.params.id, updates, { new: true });
+
+        if (!loader) {
+            return res.status(404).json({ message: "Loader not found" });
+        }
+
+        res.status(200).json({
+            message: "Loader updated successfully",
+            loader,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // Archive/Unarchive Loader
 const archiveUnarchiveLoader = async (req, res) => {

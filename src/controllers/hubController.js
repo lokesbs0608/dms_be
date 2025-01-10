@@ -21,7 +21,6 @@ const createHub = async (req, res) => {
             pincodes,
             status,
         } = req.body;
-
         // Validate required fields
         if (!name || !address || !manager_id || !emergency_person_id || !hub_code || !division || !pincodes) {
             return res.status(400).json({ message: "Please provide all required fields." });
@@ -82,7 +81,7 @@ const updateHub = async (req, res) => {
             return res.status(404).json({ message: `Hub with ID ${id} not found` });
         }
 
-        res.status(200).json({ message: "Hub updated successfully", hub: updatedHub });
+        res.status(200).json({ message: "Hub updated successfully", });
     } catch (error) {
         // Return error message
         console.error(error); // Log the error for debugging
@@ -119,6 +118,66 @@ const deleteHub = async (req, res) => {
     }
 };
 
+
+// archive Employee
+const archiveHub = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check for sufficient role
+        if (req.user.role !== "super_admin" && req.user.role !== "admin") {
+            return res.status(403).json({
+                message: "Access Denied. Only Super Admin or Admin can archive an employee.",
+            });
+        }
+
+        // Update the hub's status to archived
+        const hub = await Hub.findByIdAndUpdate(
+            id,
+            { status: "Inactive" },
+            { new: true }
+        );
+
+        if (!hub) {
+            return res.status(404).json({ message: "Hub not found" });
+        }
+
+        res.status(200).json({ message: "Hub archived successfully", });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message || "Internal Server Error" });
+    }
+};
+// archive Employee
+const unArchiveHub = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check for sufficient role
+        if (req.user.role !== "super_admin" && req.user.role !== "admin") {
+            return res.status(403).json({
+                message: "Access Denied. Only Super Admin or Admin can archive an employee.",
+            });
+        }
+
+        // Update the hub's status to archived
+        const hub = await Hub.findByIdAndUpdate(
+            id,
+            { status: "Active" },
+            { new: true }
+        );
+
+        if (!hub) {
+            return res.status(404).json({ message: "Hub not found" });
+        }
+
+        res.status(200).json({ message: "Hub archived successfully", });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message || "Internal Server Error" });
+    }
+};
+
 // Get Hub by ID
 const getHubById = async (req, res) => {
     // Check if the user has sufficient role to view employees
@@ -139,8 +198,7 @@ const getHubById = async (req, res) => {
         const hub = await Hub.findById(id)
             .populate("documents_id")
             .populate("bank_details_id")
-            .populate("manager_id")
-            .populate("emergency_person_id");
+
 
         if (!hub) {
             return res.status(404).json({ message: `Hub with ID ${id} not found` });
@@ -197,4 +255,4 @@ const getAllHubs = async (req, res) => {
 };
 
 
-module.exports = { createHub, updateHub, deleteHub, getHubById, getAllHubs };
+module.exports = { createHub, updateHub, deleteHub, getHubById, getAllHubs, archiveHub, unArchiveHub };

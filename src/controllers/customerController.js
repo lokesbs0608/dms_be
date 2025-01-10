@@ -3,7 +3,7 @@ const transporter = require("../config/transporter");
 
 const createCustomer = async (req, res) => {
     try {
-        const { name, address, company_name, account_id, documents, email, contacts, username, password } = req.body;
+        const { name, address, company_name, account_id, documents, email, contacts, password } = req.body;
 
         const existingCustomer = await Customer.findOne({ email });
         if (existingCustomer) {
@@ -18,12 +18,12 @@ const createCustomer = async (req, res) => {
             documents,
             email,
             contacts,
-            username,
+            username: email,
             password,
         });
-
+        // after customer created user name and password should be sent there email
         await customer.save();
-        res.status(201).json({ message: "Customer created successfully", customer });
+        res.status(201).json({ message: "Customer created successfully" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });
@@ -33,26 +33,43 @@ const createCustomer = async (req, res) => {
 const updateCustomer = async (req, res) => {
     try {
         const { id } = req.params;
-        const updates = req.body;
+        const updates = { ...req.body };
 
-        const customer = await Customer.findByIdAndUpdate(id, updates, { new: true });
+        // Find the customer first
+        const customer = await Customer.findById(id);
         if (!customer) {
             return res.status(404).json({ message: "Customer not found" });
         }
 
-        res.status(200).json({ message: "Customer updated successfully", customer });
+        // Remove the password field if present in the request body
+        if (updates.password) {
+            delete updates.password;
+        }
+
+        // Update the customer
+        const updatedCustomer = await Customer.findByIdAndUpdate(
+            id,
+            updates,
+            { new: true }
+        );
+
+        res.status(200).json({
+            message: "Customer updated successfully",
+            customer: updatedCustomer,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });
     }
 };
 
+
 const getCustomerById = async (req, res) => {
     try {
         const { id } = req.params; // Extract ID from the route parameters
 
         // Fetch the customer by ID and populate any referenced fields if needed
-        const customer = await Customer.findById(id)
+        const customer = await Customer.findById(id).select("-password")
             .populate("account_id") // Populate the account details
             .populate("documents"); // Populate documents array
 
@@ -74,7 +91,7 @@ const archiveCustomer = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const customer = await Customer.findByIdAndUpdate(id, { status: "Archived" }, { new: true });
+        const customer = await Customer.findByIdAndUpdate(id, { status: "Inactive" }, { new: true });
         if (!customer) {
             return res.status(404).json({ message: "Customer not found" });
         }
@@ -176,12 +193,12 @@ const getAllCustomers = async (req, res) => {
         if (name) query.name = { $regex: name, $options: "i" };
         if (type) query.type = type;
 
-        const customers = await Customer.find(query)
+        const customers = await Customer.find(query).select("-password")
             .populate("account_id")
             .populate("documents");
 
         if (!customers || customers.length === 0) {
-            return res.status(404).json({ message: "No customers found" });
+            return res.status(201).json({ message: "No customers found" });
         }
 
         res.status(200).json({ customers });
@@ -218,4 +235,4 @@ const loginCustomer = async (req, res) => {
 
 
 
-module.exports = { createCustomer, updateCustomer, loginCustomer, getAllCustomers, resetCustomerPassword, forgotPassword, unarchiveCustomer, archiveCustomer ,getCustomerById}
+module.exports = { createCustomer, updateCustomer, loginCustomer, getAllCustomers, resetCustomerPassword, forgotPassword, unarchiveCustomer, archiveCustomer, getCustomerById }

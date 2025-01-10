@@ -13,7 +13,7 @@ router.post("/register", authMiddleware, customerController.createCustomer);
 router.get("/all", authMiddleware, customerController.getAllCustomers);
 router.get("/:id", authMiddleware, customerController.getCustomerById);
 router.put("/:id", authMiddleware, customerController.updateCustomer);
-router.delete("/:id", authMiddleware, customerController.archiveCustomer);
-router.put("/:id/unarchive", authMiddleware, customerController.unarchiveCustomer);
+router.patch("/:id/archive", authMiddleware, customerController.archiveCustomer);
+router.patch("/:id/unarchive", authMiddleware, customerController.unarchiveCustomer);
 
 module.exports = router;

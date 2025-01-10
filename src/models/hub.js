@@ -11,7 +11,7 @@ const hubSchema = new mongoose.Schema(
         landline_number: { type: String, required: true },
         hub_code: { type: String, required: true },
         division: { type: String, required: true },
-        pincodes: [{ type: Number, required: true }],
+        pincodes: [{ type: String, required: true }],
         status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
         created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
         updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },

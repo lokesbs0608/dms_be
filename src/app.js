@@ -16,13 +16,22 @@ const customerRoutes = require("./routes/customerRoutes");
 const loaderRoutes = require("./routes/loaderController");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const routesRoutes = require("./routes/routesRoutes");
-const organizationRoutes = require("./routes/organizationRoutes")
+const organizationRoutes = require("./routes/organizationRoutes");
 
 dotenv.config();
 
 const app = express();
+
+// CORS configuration for localhost:3000
+const corsOptions = {
+    origin: "http://localhost:3000", // Allow only this origin
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allow specific HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
+};
+
+app.use(cors(corsOptions)); // Use the configured CORS options
+
 app.use(express.json());
-app.use(cors());
 
 const PORT = process.env.PORT || 5000; // Default port is 5000 if not set in environment variables
 
@@ -57,7 +66,7 @@ app.use("/api/customer", customerRoutes);
 app.use("/api/loader", loaderRoutes);
 app.use("/api/vehicle", vehicleRoutes);
 app.use("/api/routes", routesRoutes);
-app.use("/api/organization", organizationRoutes)
+app.use("/api/organization", organizationRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

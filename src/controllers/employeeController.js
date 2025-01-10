@@ -36,7 +36,7 @@ const createEmployee = async (req, res) => {
         await employee.save();
         res
             .status(201)
-            .json({ message: "Employee created successfully", employee });
+            .json({ message: "Employee created successfully" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });
@@ -47,30 +47,42 @@ const createEmployee = async (req, res) => {
 const updateEmployee = async (req, res) => {
     try {
         const { id } = req.params;
-        const updatedData = req.body;
+        const updatedData = { ...req.body };
 
-        if (req.user.role !== "super_admin" && req.user.role != "admin") {
+        // Restrict access based on roles
+        if (req.user.role !== "super_admin" && req.user.role !== "admin") {
             return res.status(403).json({
                 message:
                     "Access Denied. Only Super Admin or Admin can update an employee.",
             });
         }
 
+        // Remove the password field if present in the request body
+        if (updatedData.password) {
+            delete updatedData.password;
+        }
+
+        // Update the employee
         const employee = await Employee.findByIdAndUpdate(
             id,
             { ...updatedData, updated_by: req.user.id },
-            { new: true },
+            { new: true }
         );
-        if (!employee)
+
+        if (!employee) {
             return res.status(404).json({ message: "Employee not found" });
-        res
-            .status(200)
-            .json({ message: "Employee updated successfully", employee });
+        }
+
+        res.status(200).json({
+            message: "Employee updated successfully",
+            employee,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // archive Employee
 const archiveEmployee = async (req, res) => {
@@ -95,7 +107,7 @@ const archiveEmployee = async (req, res) => {
             return res.status(404).json({ message: "Employee not found" });
         }
 
-        res.status(200).json({ message: "Employee archived successfully", employee });
+        res.status(200).json({ message: "Employee archived successfully", });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message || "Internal Server Error" });
@@ -124,7 +136,7 @@ const unarchiveEmployee = async (req, res) => {
             return res.status(404).json({ message: "Employee not found" });
         }
 
-        res.status(200).json({ message: "Employee unarchived successfully", employee });
+        res.status(200).json({ message: "Employee unarchived successfully", });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message || "Internal Server Error" });
@@ -163,12 +175,12 @@ const getFilteredEmployees = async (req, res) => {
         const filters = {};
 
         // Extract query parameters for filtering
-        const { branch_id, hub_id, date_of_joining, role, section, gender } =
+        const { branch_id, hub_id, date_of_joining, role, section, gender, ref_id } =
             req.query;
 
         // Add the query filters based on the provided query parameters
         if (branch_id) filters.branch_id = branch_id;
-        if (ref_id) filters.branch_id = ref_id;
+        if (ref_id) filters.ref_id = ref_id;
         if (hub_id) filters.hub_id = hub_id;
         if (date_of_joining)
             filters.date_of_joining = { $gte: new Date(date_of_joining) }; // Greater than or equal to the provided date

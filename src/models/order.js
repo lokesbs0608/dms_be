@@ -3,20 +3,19 @@ const mongoose = require("mongoose");
 const orderSchema = new mongoose.Schema(
   {
     // Existing Fields
-    consignor_id: {
+    consignorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       default: null,
     },
-    consignee_id: {
+    consigneeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       default: null,
     },
-
     // Optionally, if consignor and consignee are not available in the Customer collection, send details directly
     consignor: {
-      company_name: { type: String, default: null },
+      companyName: { type: String, default: null },
       name: { type: String, default: null },
       address: { type: String, default: null },
       city: { type: String, default: null },
@@ -31,30 +30,32 @@ const orderSchema = new mongoose.Schema(
       pincode: { type: String, default: null },
       number: { type: String, default: null },
     },
+    docketNumber: {
+      type: String,
+      required: [true, "docketNumber is required"],
+    },
 
-    docket_number: { type: String, required: true, unique: true },
+
     transport_type: {
       type: String,
       enum: ["air", "surface", "train", "sea"],
       required: true,
     },
     payment_method: { type: String, required: true },
-    source_branch_id: {
+    sourceBranchId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Branch",
-      required: true,
     },
-    destination_branch_id: {
+    destinationBranchId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Branch",
-      required: true,
     },
-    source_hub_id: {
+    sourceHubId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Hub",
       required: true,
     },
-    destination_hub_id: {
+    destinationHubId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Hub",
       required: true,
@@ -75,9 +76,9 @@ const orderSchema = new mongoose.Schema(
       ],
       default: "Picked",
     },
-    delivered_location: { type: String, default: null },
-    delivered_date: { type: Date, default: null },
-    delivered_time: { type: String, default: null },
+    deliveredLocation: { type: String, default: null },
+    deliveredDate: { type: Date, default: null },
+    deliveredTime: { type: String, default: null },
 
     // History Field
     history: [
@@ -94,12 +95,12 @@ const orderSchema = new mongoose.Schema(
       {
         weight: { type: Number, required: true },
         dimension: {
-          height: { type: Number, required: true },
-          width: { type: Number, required: true },
-          length: { type: Number, required: true },
+          height: { type: Number, },
+          width: { type: Number, },
+          length: { type: Number, },
         },
-        price: { type: Number, required: true },
-        item_id: {
+        price: { type: Number, },
+        itemId: {
           type: String,
         },
       },
@@ -116,6 +117,13 @@ const orderSchema = new mongoose.Schema(
       ref: "Employee",
       default: null,
     },
+    pickedVehicleNumber: {
+      type: String,
+      required: true
+    },
+    drsId: {
+      type: mongoose.Schema.Types.ObjectId, ref: "Customer"
+    }
   },
   {
     timestamps: true,

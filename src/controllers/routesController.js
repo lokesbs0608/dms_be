@@ -66,7 +66,7 @@ const archiveRoute = async (req, res) => {
         const route = await Route.findById(id);
         if (!route) return res.status(404).json({ message: "Route not found" });
 
-        route.status = "Archived"; // Assuming `status` field exists in the schema
+        route.status = "Inactive"; // Assuming `status` field exists in the schema
         await route.save();
 
         res.status(200).json({ message: "Route archived successfully", route });

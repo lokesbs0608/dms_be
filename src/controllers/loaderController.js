@@ -6,7 +6,7 @@ const transporter = require("../config/transporter");
 // Create Loader
 const createLoader = async (req, res) => {
     try {
-        const { code, name, documents_ids, location, account_id, status, company_name, email, username, password } = req.body;
+        const { code, name, documents_ids, tags, location, account_id, status, company_name, email, username, password } = req.body;
 
         const existingLoader = await Loader.findOne({ username });
         if (existingLoader) {
@@ -22,8 +22,9 @@ const createLoader = async (req, res) => {
             status,
             company_name,
             email,
-            username,
-            password
+            username: email,
+            password: "Login@123",
+            tags
         });
 
         await newLoader.save();

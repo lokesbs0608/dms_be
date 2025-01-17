@@ -10,7 +10,6 @@ const routeSchema = new mongoose.Schema(
         branch_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Branch",
-            required: true,
         },
         pincodes: {
             type: [String], // Array of pincode strings
@@ -37,6 +36,7 @@ const routeSchema = new mongoose.Schema(
             type: String, // Destination of the route
             required: true,
         },
+        status: { type: String, enum: ["Active", "Inactive"], default: "Active" }, // Status field for loader
         created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
         updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     },

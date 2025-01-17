@@ -17,7 +17,7 @@ router.get("/:id", authenticate, loaderController.getLoaderById);
 router.put("/:id", authenticate, loaderController.updateLoader);
 
 // Archive/Unarchive loader
-router.patch("/:id/archive", authenticate, loaderController.archiveUnarchiveLoader);
+router.patch("/:id/archiveUnarchiveLoader", authenticate, loaderController.archiveUnarchiveLoader);
 
 // Login
 router.post("/login", loaderController.login);

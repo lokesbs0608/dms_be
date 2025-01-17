@@ -6,35 +6,55 @@ const createOrder = async (req, res) => {
     try {
         const orderData = req.body; // Data from the request body
 
-        // Check if consignor and consignee are available in the Customer collection
-        if (orderData.consignor_id) {
-            const consignor = await Customer.findById(orderData.consignor_id);
+        // If consignorId is provided, fetch and update consignor details
+        if (orderData.consignorId) {
+            const consignor = await Customer.findById(orderData.consignorId);
             if (!consignor) {
                 return res.status(400).json({ message: "Consignor not found" });
             }
+            // Update consignor details in the order data
+            orderData.consignor = {
+                name: consignor.name || "",
+                companyName: consignor.companyName || "",
+                address: consignor.address || "",
+                city: consignor.city || "",
+                pincode: consignor.pincode || "",
+                number: consignor.number || "",
+            };
         }
 
-        if (orderData.consignee_id) {
-            const consignee = await Customer.findById(orderData.consignee_id);
+        // If consignee_id is provided, fetch and update consignee details
+        if (orderData.consigneeId) {
+            const consignee = await Customer.findById(orderData.consigneeId);
             if (!consignee) {
                 return res.status(400).json({ message: "Consignee not found" });
             }
+            // Update consignee details in the order data
+            orderData.consignee = {
+                name: consignee.name || "",
+                companyName: consignee.companyName || "",
+                address: consignee.address || "",
+                city: consignee.city || "",
+                pincode: consignee.pincode || "",
+                number: consignee.number || "",
+            };
         }
 
         // Create the order in the database
         const newOrder = new Order(orderData);
         await newOrder.save();
 
-        return res
-            .status(201)
-            .json({ message: "Order created successfully", order: newOrder });
+        return res.status(201).json({ message: "Order created successfully" });
     } catch (error) {
-        console.error(error);
-        return res
-            .status(500)
-            .json({ message: "Error creating order", error: error.message });
+        if (error.code === 11000) {
+            res.status(400).json({ error: "Docket number must be unique" });
+        } else {
+            res.status(500).json({ error: "Error creating order" });
+        }
+
     }
 };
+
 
 // Controller to update an order's details
 const updateOrder = async (req, res) => {
@@ -46,6 +66,41 @@ const updateOrder = async (req, res) => {
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
+
+        // If consignor_id is provided, fetch and update consignor details
+        if (updatedData.consignor_id) {
+            const consignor = await Customer.findById(updatedData.consignor_id);
+            if (!consignor) {
+                return res.status(400).json({ message: "Consignor not found" });
+            }
+            // Update consignor details in the order data
+            updatedData.consignor = {
+                name: consignor.name || "",
+                companyName: consignor.companyName || "",
+                address: consignor.address || "",
+                city: consignor.city || "",
+                pincode: consignor.pincode || "",
+                number: consignor.number || "",
+            };
+        }
+
+        // If consignee_id is provided, fetch and update consignee details
+        if (updatedData.consignee_id) {
+            const consignee = await Customer.findById(updatedData.consignee_id);
+            if (!consignee) {
+                return res.status(400).json({ message: "Consignee not found" });
+            }
+            // Update consignee details in the order data
+            updatedData.consignee = {
+                name: consignee.name || "",
+                companyName: consignee.companyName || "",
+                address: consignee.address || "",
+                city: consignee.city || "",
+                pincode: consignee.pincode || "",
+                number: consignee.number || "",
+            };
+        }
+
 
         // Update order fields
         Object.assign(order, updatedData);
@@ -188,7 +243,7 @@ const filterOrders = async (req, res) => {
             transport_type,
             destination_hub_id,
             source_hub_id,
-            docket_number,
+            docketNumber,
             created_by,
             delivered_by,
             consignor_id,
@@ -204,9 +259,9 @@ const filterOrders = async (req, res) => {
         if (status) {
             filterConditions.status = status;
         }
-        // Filter by docket_number if provided
-        if (docket_number) {
-            filterConditions.docket_number = docket_number;
+        // Filter by docketNumber if provided
+        if (docketNumber) {
+            filterConditions.docketNumber = docketNumber;
         }
         // Filter by source branch if provided
         if (source_branch_id) {

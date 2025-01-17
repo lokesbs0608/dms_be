@@ -3,7 +3,7 @@ const router = express.Router();
 const orderController = require("../controllers/orderController"); // Adjust the path accordingly
 
 // Create an order
-router.post("/orders", orderController.createOrder);
+router.post("/", orderController.createOrder);
 
 // Update an order
 router.put("/orders/:orderId", orderController.updateOrder);
@@ -21,6 +21,6 @@ router.post("/orders/history/:orderId", orderController.addHistoryToOrder);
 router.put("/orders/status/:orderId", orderController.changeOrderStatus);
 
 // Filter orders
-router.get("/orders", orderController.filterOrders);
+router.get("/", orderController.filterOrders);
 
 module.exports = router;

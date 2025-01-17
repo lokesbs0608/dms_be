@@ -14,11 +14,11 @@ const organizationSchema = new mongoose.Schema(
         website: {
             type: String,
         },
-        contact: [
+        contacts: [
             {
                 name: { type: String, required: true }, // Contact person name
                 number: { type: String, required: true }, // Phone number
-                type: { type: String, enum: ["Office", "Personal", "Support"], required: true }, // Type of contact
+                type: { type: String, enum: ["Office", "Personal", "Support", "Business", "Emergency"], required: true }, // Type of contact
                 email: { type: String }, // Email address
             },
         ],

@@ -23,7 +23,7 @@ const createOrder = async (req, res) => {
             };
         }
 
-        // If consignee_id is provided, fetch and update consignee details
+        // If consigneeId is provided, fetch and update consignee details
         if (orderData.consigneeId) {
             const consignee = await Customer.findById(orderData.consigneeId);
             if (!consignee) {
@@ -44,14 +44,13 @@ const createOrder = async (req, res) => {
         const newOrder = new Order(orderData);
         await newOrder.save();
 
-        return res.status(201).json({ message: "Order created successfully" });
+        return res.status(201).json({ message: "Order created successfully", });
     } catch (error) {
-        if (error.code === 11000) {
-            res.status(400).json({ error: "Docket number must be unique" });
+        if (error.code === 11000 && error.keyValue && error.keyValue.docketNumber) {
+            res.status(400).json({ error: `Docket number '${error.keyValue.docketNumber}' already exists. Please provide a unique docket number.` });
         } else {
-            res.status(500).json({ error: "Error creating order" });
+            res.status(500).json({ error: "Error creating order", details: error.message });
         }
-
     }
 };
 
@@ -59,17 +58,22 @@ const createOrder = async (req, res) => {
 // Controller to update an order's details
 const updateOrder = async (req, res) => {
     try {
-        const { orderId } = req.params; // Get the orderId from the request parameters
+        const { id } = req.params; // Get the id from the request parameters
         const updatedData = req.body; // Data to update from the request body
 
-        const order = await Order.findById(orderId);
+        // Remove `_id` field if it exists in the request body
+        if (updatedData._id) {
+            delete updatedData._id;
+        }
+
+        const order = await Order.findById(id);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
 
         // If consignor_id is provided, fetch and update consignor details
-        if (updatedData.consignor_id) {
-            const consignor = await Customer.findById(updatedData.consignor_id);
+        if (updatedData.consignorId) {
+            const consignor = await Customer.findById(updatedData.consignorId);
             if (!consignor) {
                 return res.status(400).json({ message: "Consignor not found" });
             }
@@ -85,8 +89,8 @@ const updateOrder = async (req, res) => {
         }
 
         // If consignee_id is provided, fetch and update consignee details
-        if (updatedData.consignee_id) {
-            const consignee = await Customer.findById(updatedData.consignee_id);
+        if (updatedData.consigneeId) {
+            const consignee = await Customer.findById(updatedData.consigneeId);
             if (!consignee) {
                 return res.status(400).json({ message: "Consignee not found" });
             }
@@ -100,7 +104,6 @@ const updateOrder = async (req, res) => {
                 number: consignee.number || "",
             };
         }
-
 
         // Update order fields
         Object.assign(order, updatedData);
@@ -116,7 +119,6 @@ const updateOrder = async (req, res) => {
             .json({ message: "Error updating order", error: error.message });
     }
 };
-
 // Controller to archive an order
 const archiveOrder = async (req, res) => {
     try {
@@ -313,13 +315,38 @@ const filterOrders = async (req, res) => {
             filterConditions.payment_method = payment_method;
         }
 
-        const orders = await Order.find(filterConditions); // Fetch filtered orders
+        const orders = await Order.find(filterConditions)
+            .populate('destinationHubId') // Populate the destination hub
+            .populate('sourceHubId'); // Populate the source hub; // Fetch filtered orders
         return res.status(200).json({ orders });
     } catch (error) {
         console.error(error);
         return res
             .status(500)
             .json({ message: "Error filtering orders", error: error.message });
+    }
+};
+
+
+
+// Controller to fetch an order by ID
+const getOrderById = async (req, res) => {
+    try {
+        const { id } = req.params; // Extract the order ID from the request parameters
+
+
+
+        // Find the order by ID
+        const order = await Order.findById(id)
+
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        return res.status(200).json(order);
+    } catch (error) {
+        return res.status(500).json({ error: "Error fetching order", details: error.message });
     }
 };
 
@@ -331,4 +358,5 @@ module.exports = {
     addHistoryToOrder,
     changeOrderStatus,
     filterOrders,
+    getOrderById
 };

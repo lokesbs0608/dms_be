@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    // Existing Fields
     consignorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
@@ -13,7 +12,6 @@ const orderSchema = new mongoose.Schema(
       ref: "Customer",
       default: null,
     },
-    // Optionally, if consignor and consignee are not available in the Customer collection, send details directly
     consignor: {
       companyName: { type: String, default: null },
       name: { type: String, default: null },
@@ -32,10 +30,15 @@ const orderSchema = new mongoose.Schema(
     },
     docketNumber: {
       type: String,
+      unique: true,
       required: [true, "docketNumber is required"],
+      validate: {
+        validator: function (v) {
+          return /^\d+$/.test(v); // Validates that the docket number contains only numbers
+        },
+        message: "docketNumber must be a string of numbers.",
+      },
     },
-
-
     transport_type: {
       type: String,
       enum: ["air", "surface", "train", "sea"],
@@ -79,8 +82,6 @@ const orderSchema = new mongoose.Schema(
     deliveredLocation: { type: String, default: null },
     deliveredDate: { type: Date, default: null },
     deliveredTime: { type: String, default: null },
-
-    // History Field
     history: [
       {
         status: { type: String, required: true },
@@ -89,17 +90,15 @@ const orderSchema = new mongoose.Schema(
         details: { type: String, default: null },
       },
     ],
-
-    // Items Array
     items: [
       {
         weight: { type: Number, required: true },
         dimension: {
-          height: { type: Number, },
-          width: { type: Number, },
-          length: { type: Number, },
+          height: { type: Number },
+          width: { type: Number },
+          length: { type: Number },
         },
-        price: { type: Number, },
+        price: { type: Number },
         itemId: {
           type: String,
         },
@@ -119,15 +118,18 @@ const orderSchema = new mongoose.Schema(
     },
     pickedVehicleNumber: {
       type: String,
-      required: true
+      required: true,
     },
     drsId: {
-      type: mongoose.Schema.Types.ObjectId, ref: "Customer"
-    }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+    },
   },
   {
     timestamps: true,
-  },
+  }
 );
+
+orderSchema.index({ docketNumber: 1 }, { unique: true });
 
 module.exports = mongoose.model("Order", orderSchema);

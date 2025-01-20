@@ -6,19 +6,22 @@ const orderController = require("../controllers/orderController"); // Adjust the
 router.post("/", orderController.createOrder);
 
 // Update an order
-router.put("/orders/:orderId", orderController.updateOrder);
+router.get("/:id", orderController.getOrderById);
+
+// Update an order
+router.put("/:id", orderController.updateOrder);
 
 // Archive an order
-router.put("/orders/archive/:orderId", orderController.archiveOrder);
+router.put("/archive/:id", orderController.archiveOrder);
 
 // Unarchive an order
-router.put("/orders/unarchive/:orderId", orderController.unarchiveOrder);
+router.put("/unarchive/:id", orderController.unarchiveOrder);
 
 // Add history to an order
-router.post("/orders/history/:orderId", orderController.addHistoryToOrder);
+router.post("/history/:id", orderController.addHistoryToOrder);
 
 // Change order status
-router.put("/orders/status/:orderId", orderController.changeOrderStatus);
+router.put("/status/:id", orderController.changeOrderStatus);
 
 // Filter orders
 router.get("/", orderController.filterOrders);

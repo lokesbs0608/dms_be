@@ -139,7 +139,8 @@ const forgotPassword = async (req, res) => {
         // Set OTP and expiration in the database
         customer.resetOtp = otp;
         customer.resetOtpExpiration = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
-        customer?.updated_by = req?.user?.id
+ 
+
         await customer.save();
 
         // Send OTP via email
@@ -176,7 +177,7 @@ const resetCustomerPassword = async (req, res) => {
         customer.password = newPassword;
         customer.resetOtp = null;
         customer.resetOtpExpiration = null;
-        customer?.updated_by = req?.user?.id
+    
         await customer.save();
 
         res.status(200).json({ message: "Password reset successful" });

@@ -6,6 +6,11 @@ const createOrder = async (req, res) => {
     try {
         const orderData = req.body; // Data from the request body
 
+        console.log(req?.user, '??????');
+        orderData.updated_by = req?.user?.id
+        orderData.created_by = req?.user?.id;
+
+
         // If consignorId is provided, fetch and update consignor details
         if (orderData.consignorId) {
             const consignor = await Customer.findById(orderData.consignorId);
@@ -60,6 +65,8 @@ const updateOrder = async (req, res) => {
     try {
         const { id } = req.params; // Get the id from the request parameters
         const updatedData = req.body; // Data to update from the request body
+
+        updatedData.updated_by = req?.user?.id
 
         // Remove `_id` field if it exists in the request body
         if (updatedData._id) {
@@ -124,11 +131,13 @@ const archiveOrder = async (req, res) => {
     try {
         const { orderId } = req.params; // Get the orderId from the request parameters
 
+
         const order = await Order.findById(orderId);
+
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
-
+        order.updated_by = req?.user?.id;
         order.status = "Archived"; // Mark order as archived
         await order.save();
 
@@ -154,6 +163,7 @@ const unarchiveOrder = async (req, res) => {
         }
 
         order.status = "Pending"; // Mark order as pending or any other appropriate status
+        order.updated_by = req?.user?.id;
         await order.save();
 
         return res
@@ -174,6 +184,7 @@ const addHistoryToOrder = async (req, res) => {
         const { status, location, details } = req.body; // History data from request body
 
         const order = await Order.findById(orderId);
+        order.updated_by = req?.user?.id;
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
@@ -206,7 +217,9 @@ const changeOrderStatus = async (req, res) => {
         const { orderId } = req.params; // Get the orderId from the request parameters
         const { status } = req.body; // New status from the request body
 
+
         const order = await Order.findById(orderId);
+        order.updated_by = req?.user?.id;
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }

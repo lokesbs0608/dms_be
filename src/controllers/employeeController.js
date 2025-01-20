@@ -99,7 +99,7 @@ const archiveEmployee = async (req, res) => {
         // Update the employee's status to archived
         const employee = await Employee.findByIdAndUpdate(
             id,
-            { status: "Inactive" },
+            { status: "Inactive", updated_by: req?.user?.id },
             { new: true }
         );
 
@@ -128,7 +128,8 @@ const unarchiveEmployee = async (req, res) => {
         // Update the employee's status to active
         const employee = await Employee.findByIdAndUpdate(
             id,
-            { status: "Active" },
+            { status: "Active", updated_by: req?.user?.id },
+
             { new: true }
         );
 

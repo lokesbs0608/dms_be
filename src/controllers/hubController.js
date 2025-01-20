@@ -134,7 +134,7 @@ const archiveHub = async (req, res) => {
         // Update the hub's status to archived
         const hub = await Hub.findByIdAndUpdate(
             id,
-            { status: "Inactive" },
+            { status: "Inactive", updated_by: req.user.id, },
             { new: true }
         );
 
@@ -163,7 +163,7 @@ const unArchiveHub = async (req, res) => {
         // Update the hub's status to archived
         const hub = await Hub.findByIdAndUpdate(
             id,
-            { status: "Active" },
+            { status: "Active", updated_by: req.user.id, },
             { new: true }
         );
 

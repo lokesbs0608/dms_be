@@ -35,6 +35,9 @@ const updateCustomer = async (req, res) => {
         const { id } = req.params;
         const updates = { ...req.body };
 
+        console.log(req?.user, '??????');
+        updates.updated_by = req?.user?.id;
+
         // Find the customer first
         const customer = await Customer.findById(id);
         if (!customer) {
@@ -91,7 +94,7 @@ const archiveCustomer = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const customer = await Customer.findByIdAndUpdate(id, { status: "Inactive" }, { new: true });
+        const customer = await Customer.findByIdAndUpdate(id, { status: "Inactive", updated_by: req?.user?.id }, { new: true });
         if (!customer) {
             return res.status(404).json({ message: "Customer not found" });
         }
@@ -107,7 +110,7 @@ const unarchiveCustomer = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const customer = await Customer.findByIdAndUpdate(id, { status: "Active" }, { new: true });
+        const customer = await Customer.findByIdAndUpdate(id, { status: "Active", updated_by: req?.user?.id }, { new: true });
         if (!customer) {
             return res.status(404).json({ message: "Customer not found" });
         }
@@ -136,6 +139,7 @@ const forgotPassword = async (req, res) => {
         // Set OTP and expiration in the database
         customer.resetOtp = otp;
         customer.resetOtpExpiration = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+        customer?.updated_by = req?.user?.id
         await customer.save();
 
         // Send OTP via email
@@ -172,6 +176,7 @@ const resetCustomerPassword = async (req, res) => {
         customer.password = newPassword;
         customer.resetOtp = null;
         customer.resetOtpExpiration = null;
+        customer?.updated_by = req?.user?.id
         await customer.save();
 
         res.status(200).json({ message: "Password reset successful" });

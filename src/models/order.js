@@ -124,6 +124,8 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
     },
+    created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
+    updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
   },
   {
     timestamps: true,

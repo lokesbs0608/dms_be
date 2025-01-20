@@ -2,28 +2,31 @@ const express = require("express");
 const router = express.Router();
 const orderController = require("../controllers/orderController"); // Adjust the path accordingly
 
+// Middleware to check authentication
+const authenticate = require("../middleware/auth");
+
 // Create an order
-router.post("/", orderController.createOrder);
+router.post("/", authenticate, orderController.createOrder);
 
 // Update an order
-router.get("/:id", orderController.getOrderById);
+router.get("/:id", authenticate, orderController.getOrderById);
 
 // Update an order
-router.put("/:id", orderController.updateOrder);
+router.put("/:id", authenticate, orderController.updateOrder);
 
 // Archive an order
-router.put("/archive/:id", orderController.archiveOrder);
+router.put("/archive/:id", authenticate, orderController.archiveOrder);
 
 // Unarchive an order
-router.put("/unarchive/:id", orderController.unarchiveOrder);
+router.put("/unarchive/:id", authenticate, orderController.unarchiveOrder);
 
 // Add history to an order
-router.post("/history/:id", orderController.addHistoryToOrder);
+router.post("/history/:id", authenticate, orderController.addHistoryToOrder);
 
 // Change order status
-router.put("/status/:id", orderController.changeOrderStatus);
+router.put("/status/:id", authenticate, orderController.changeOrderStatus);
 
 // Filter orders
-router.get("/", orderController.filterOrders);
+router.get("/", authenticate, orderController.filterOrders);
 
 module.exports = router;

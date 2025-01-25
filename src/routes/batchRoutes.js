@@ -5,10 +5,11 @@ const batchController = require('../controllers/batchController');  // Adjust pa
 // Middleware to check authentication
 const authenticate = require("../middleware/auth");
 
-router.post('/batches', authenticate, batchController.createBatch);
-router.get('/batches', authenticate, batchController.getAllBatches);
-router.get('/batches/:id', authenticate, batchController.getBatchById);
-router.put('/batches/:id', authenticate, batchController.updateBatch);
-router.delete('/batches/:id', authenticate, batchController.deleteBatch);
+router.post('/', authenticate, batchController.createBatch);
+router.get('', authenticate, batchController.getAllBatches);
+router.get('/:id', authenticate, batchController.getBatchById);
+router.put('/:id', authenticate, batchController.updateBatch);
+router.delete('/:id', authenticate, batchController.deleteBatch);
+router.delete('/:batchId/items/:itemId', authenticate, batchController.deleteItemFromBatch)
 
 module.exports = router;

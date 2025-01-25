@@ -86,6 +86,11 @@ const manifestSchema = new Schema(
             required: true,
             default: "0",
         },
+        transport_type: {
+            type: String,
+            enum: ["air", "surface", "train", "sea"],
+            required: true,
+        },
         status: {
             type: String,
             enum: ['In Transit', 'Delivered', 'Pending'],

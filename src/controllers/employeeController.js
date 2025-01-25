@@ -28,7 +28,6 @@ const createEmployee = async (req, res) => {
             email,
             password,
             role,
-
             created_by: req?.user?.id, // Use JWT data for creator
             updated_by: req?.user?.id, // Use JWT data for updater
         });

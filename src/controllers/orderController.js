@@ -249,6 +249,7 @@ const changeOrderStatus = async (req, res) => {
 };
 
 // Controller to filter orders based on various criteria
+// Controller to filter orders based on various criteria
 const filterOrders = async (req, res) => {
     try {
         const {
@@ -257,7 +258,7 @@ const filterOrders = async (req, res) => {
             destination_branch_id,
             transport_type,
             destination_hub_id,
-            source_hub_id,
+            sourceHubId,
             docketNumber,
             created_by,
             delivered_by,
@@ -270,14 +271,17 @@ const filterOrders = async (req, res) => {
 
         const filterConditions = {};
 
-        // Filter by status if provided
+        // Filter by status (handle multiple statuses as an array)
         if (status) {
-            filterConditions.status = status;
+            const statusArray = Array.isArray(status) ? status : status.split(',');
+            filterConditions.status = { $in: statusArray };
         }
+
         // Filter by docketNumber if provided
         if (docketNumber) {
             filterConditions.docketNumber = docketNumber;
         }
+
         // Filter by source branch if provided
         if (source_branch_id) {
             filterConditions.source_branch_id = source_branch_id;
@@ -287,12 +291,13 @@ const filterOrders = async (req, res) => {
         if (destination_branch_id) {
             filterConditions.destination_branch_id = destination_branch_id;
         }
-        // Filter by source branch if provided
-        if (source_hub_id) {
-            filterConditions.source_hub_id = source_hub_id;
+
+        // Filter by source hub ID if provided
+        if (sourceHubId) {
+            filterConditions.sourceHubId = sourceHubId;
         }
 
-        // Filter by destination branch if provided
+        // Filter by destination hub ID if provided
         if (destination_hub_id) {
             filterConditions.destination_hub_id = destination_hub_id;
         }
@@ -301,36 +306,46 @@ const filterOrders = async (req, res) => {
         if (transport_type) {
             filterConditions.transport_type = transport_type;
         }
-        // Filter by created user
+
+        // Filter by created user if provided
         if (created_by) {
             filterConditions.created_by = created_by;
         }
 
-        // Filter by delivered user
+        // Filter by delivered user if provided
         if (delivered_by) {
             filterConditions.delivered_by = delivered_by;
         }
-        // Filter by consignor_id
+
+        // Filter by consignor ID if provided
         if (consignor_id) {
             filterConditions.consignor_id = consignor_id;
-        } // Filter by consignee_id
+        }
+
+        // Filter by consignee ID if provided
         if (consignee_id) {
             filterConditions.consignee_id = consignee_id;
         }
-        // Filter by consignor_name
+
+        // Filter by consignor name if provided
         if (consignor_name) {
-            filterConditions.consignor.name = consignor_name;
-        } // Filter by consignee_name
-        if (consignee_name) {
-            filterConditions.consignee.name = consignee_name;
+            filterConditions['consignor.name'] = consignor_name;
         }
+
+        // Filter by consignee name if provided
+        if (consignee_name) {
+            filterConditions['consignee.name'] = consignee_name;
+        }
+
+        // Filter by payment method if provided
         if (payment_method) {
             filterConditions.payment_method = payment_method;
         }
 
         const orders = await Order.find(filterConditions)
             .populate('destinationHubId') // Populate the destination hub
-            .populate('sourceHubId'); // Populate the source hub; // Fetch filtered orders
+            .populate('sourceHubId'); // Populate the source hub
+
         return res.status(200).json({ orders });
     } catch (error) {
         console.error(error);

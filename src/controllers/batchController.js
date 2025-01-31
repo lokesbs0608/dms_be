@@ -178,7 +178,7 @@ const deleteBatch = async (req, res) => {
             return res.status(404).json({ message: "Batch not found" });
         }
 
-        await batch.remove(); // Remove the batch from the database
+        await Batch.findByIdAndDelete(id);
 
         return res.status(200).json({ message: "Batch deleted successfully" });
     } catch (error) {

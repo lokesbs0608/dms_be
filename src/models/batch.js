@@ -6,6 +6,7 @@ const itemSchema = new Schema({
     itemId: {
         type: String,
         required: true,
+        unique: true
     },
 });
 

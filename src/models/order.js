@@ -99,6 +99,22 @@ const orderSchema = new mongoose.Schema(
           length: { type: Number },
         },
         price: { type: Number },
+        status: {
+          type: String,
+          enum: [
+            "Picked",
+            "Reached_Source_Branch",
+            "Reached_Source_Hub",
+            "In Transit",
+            "Reached_Destination_Hub",
+            "Reached_Destination_Branch",
+            "Pending",
+            "Out_For_Delivery",
+            "Delivered",
+            "Cancelled",
+          ],
+          default: "Picked",
+        },
         itemId: {
           type: String,
         },

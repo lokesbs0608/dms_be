@@ -105,6 +105,9 @@ const manifestSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',  // Reference to the User model
         },
+        issueStatus: {
+            type: String,
+        }
     },
     { timestamps: true }  // Automatically manage createdAt and updatedAt fields
 );

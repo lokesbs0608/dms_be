@@ -257,7 +257,7 @@ const filterOrders = async (req, res) => {
             source_branch_id,
             destination_branch_id,
             transport_type,
-            destination_hub_id,
+            destinationHubId,
             sourceHubId,
             docketNumber,
             created_by,
@@ -298,8 +298,8 @@ const filterOrders = async (req, res) => {
         }
 
         // Filter by destination hub ID if provided
-        if (destination_hub_id) {
-            filterConditions.destination_hub_id = destination_hub_id;
+        if (destinationHubId) {
+            filterConditions.destinationHubId = destinationHubId;
         }
 
         // Filter by transport type if provided

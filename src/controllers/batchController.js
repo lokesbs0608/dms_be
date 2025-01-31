@@ -7,44 +7,49 @@ const createBatch = async (req, res) => {
         // Check if ordersIDs is an array
         if (!Array.isArray(req.body)) {
             console.error("Invalid payload format. 'ordersIDs' must be an array.");
-            return res
-                .status(400)
-                .json({
-                    message: "Invalid payload format. 'ordersIDs' must be an array.",
-                });
+            return res.status(400).json({
+                message: "Invalid payload format. 'ordersIDs' must be an array.",
+            });
         }
 
         const processedOrders = [];
+
+        // Fetch all existing itemIds from the database
+        const allExistingItems = await Batch.aggregate([
+            { $unwind: "$ordersIDs" },
+            { $unwind: "$ordersIDs.items" },
+            { $project: { itemId: "$ordersIDs.items.itemId", _id: 0 } }
+        ]).then(results => results.map(item => item.itemId));
+
+        const existingItemSet = new Set(allExistingItems);
+
         // Iterate over the orders in the payload (first level of objects)
         for (const orderContainer of req.body) {
-            console.log("Order Container:", orderContainer); // Log each order container for inspection
             if (orderContainer.ordersIDs && Array.isArray(orderContainer.ordersIDs)) {
                 // Process each order in the ordersIDs array (second level)
                 for (const order of orderContainer.ordersIDs) {
                     if (order.parent_id && Array.isArray(order.items)) {
-                        console.log("Order:", order); // Log each order for inspection
+                        // Filter out items that already exist in the database
+                        const uniqueItems = order.items.filter(
+                            item => !existingItemSet.has(item.itemId)
+                        );
 
-                        // Check if the combination of parent_id and itemId already exists in any batch
-                        const existingBatch = await Batch.findOne({
-                            "ordersIDs.parent_id": order.parent_id,
-                            "ordersIDs.items.itemId": { $in: order.items.map(item => item.itemId) }
-                        });
-
-                        if (!existingBatch) {
-                            // If no existing batch is found, create a new structure with parent_id and items
+                        if (uniqueItems.length > 0) {
+                            // Add the unique items to the processedOrders array
                             processedOrders.push({
                                 parent_id: order.parent_id,
-                                items: order.items, // Extracting itemId from items
+                                items: uniqueItems,
                             });
-                        } else {
-                            console.log(`Batch with parent_id ${order.parent_id} and item(s) already exists.`);
+
+                            // Update the existing item set with the new items
+                            uniqueItems.forEach(item => existingItemSet.add(item.itemId));
                         }
                     }
                 }
             }
         }
 
-        // Create a new batch using the processed orders if there are any new items to add
+        // Create a new batch using the processed orders if there are any unique items
         if (processedOrders.length > 0) {
             const newBatch = new Batch({
                 ordersIDs: processedOrders,
@@ -57,15 +62,15 @@ const createBatch = async (req, res) => {
 
             return res.status(201).json({ message: "Batch created successfully" });
         } else {
-            return res.status(400).json({ message: "No new orders to create" });
+            return res.status(400).json({ message: "No unique items to create" });
         }
     } catch (error) {
         console.error("Error creating batch:", error);
-        return res
-            .status(500)
-            .json({ message: "Error creating batch", error: error.message });
+        return res.status(500).json({ message: "Error creating batch", error: error.message });
     }
 };
+
+
 
 
 const getAllBatches = async (req, res) => {

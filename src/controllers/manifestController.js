@@ -262,11 +262,93 @@ const removeOrderId = async (req, res) => {
     }
 };
 
+const updateManifestStatus = async (req, res) => {
+    try {
+        const { manifestId, status } = req.params;
+        console.log(manifestId, status);
+
+        if (!manifestId || !status) {
+            return res.status(400).json({
+                message: "Manifest ID and Status are required.",
+            });
+        }
+
+        // Find the manifest
+        const manifest = await Manifest.findById(manifestId);
+        if (!manifest) {
+            return res.status(404).json({ message: "Manifest not found" });
+        }
+
+        // Extract order IDs from the manifest
+        const orderIdsArray = manifest.orderIDs.map(order => order._id);
+
+        if (status === "In Transit") {
+            // Update order status and items' statuses
+            await Order.updateMany(
+                { _id: { $in: orderIdsArray } },
+                {
+                    $set: {
+                        status: status,
+                        "items.$[].status": status,
+                    },
+                }
+            );
+        }
+        else if (status === "Delivered") {
+            await Order.updateMany(
+                { _id: { $in: orderIdsArray } },
+                {
+                    $set: {
+                        status: 'Reached Destination Hub',
+                        "items.$[].status": 'Reached Destination Hub',
+                    },
+                }
+            );
+        }
+        else if (status === "Pending") {
+            await Order.updateMany(
+                { _id: { $in: orderIdsArray } },
+                {
+                    $set: {
+                        status: 'Manifested',
+                        "items.$[].status": 'Manifested',
+                    },
+                }
+            );
+        }
+
+        // Always update the manifest's orderIDs and items' statuses
+        const updatedManifest = await Manifest.findByIdAndUpdate(
+            manifestId,
+            {
+                $set: {
+                    status: status,
+                    "orderIDs.$[].items.$[].status": status // Update status for items in orderIDs
+                }
+            },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            message: "Manifest status updated successfully.",
+            updatedManifest,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error updating manifest status",
+            error: error.message,
+        });
+    }
+};
+
+
 module.exports = {
     createManifest,
     getAllManifests,
     updateManifest,
     getManifestById,
     deleteManifest,
+    updateManifestStatus,
     removeOrderId,
 };

@@ -11,6 +11,7 @@ router.get('/', authenticate, manifestController.getAllManifests);
 router.get('/:id', authenticate, manifestController.getManifestById);
 router.put('/:id', authenticate, manifestController.updateManifest);
 router.put('/:manifestId/order/:orderId', authenticate, manifestController.removeOrderId);
+router.put('/:manifestId/status/:status', authenticate, manifestController.updateManifestStatus);
 router.delete('/:id', authenticate, manifestController.deleteManifest);
 
 module.exports = router;

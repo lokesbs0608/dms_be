@@ -10,6 +10,7 @@ router.post('/', authenticate, manifestController.createManifest);
 router.get('/', authenticate, manifestController.getAllManifests);
 router.get('/:id', authenticate, manifestController.getManifestById);
 router.put('/:id', authenticate, manifestController.updateManifest);
+router.put('/:manifestId/order/:orderId', authenticate, manifestController.removeOrderId);
 router.delete('/:id', authenticate, manifestController.deleteManifest);
 
 module.exports = router;

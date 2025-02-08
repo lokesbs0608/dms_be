@@ -5,12 +5,8 @@ const Customer = require("../models/customer"); // Assuming the model is in the 
 const createOrder = async (req, res) => {
     try {
         const orderData = req.body; // Data from the request body
-
-        console.log(req?.user, '??????');
         orderData.updated_by = req?.user?.id
         orderData.created_by = req?.user?.id;
-
-
         // If consignorId is provided, fetch and update consignor details
         if (orderData.consignorId) {
             const consignor = await Customer.findById(orderData.consignorId);
@@ -44,12 +40,19 @@ const createOrder = async (req, res) => {
                 number: consignee.number || "",
             };
         }
+        const findOrder = await Order.findOne({ docketNumber: orderData?.docketNumber });
+
+        if (findOrder) {
+            return res.status(409).json({ message: "Docket Number is already present" });
+        }
 
         // Create the order in the database
         const newOrder = new Order(orderData);
         await newOrder.save();
 
-        return res.status(201).json({ message: "Order created successfully", });
+        return res.status(201).json({ message: "Order created successfully" });
+
+
     } catch (error) {
         if (error.code === 11000 && error.keyValue && error.keyValue.docketNumber) {
             res.status(400).json({ error: `Docket number '${error.keyValue.docketNumber}' already exists. Please provide a unique docket number.` });

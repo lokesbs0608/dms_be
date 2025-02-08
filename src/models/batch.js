@@ -8,15 +8,31 @@ const itemSchema = new Schema({
         required: true,
         unique: true
     },
-});
-
-// Define the Order reference schema
-const orderReferenceSchema = new Schema({
     parent_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order',  // Reference to the Order model
         required: true,
     },
+    status: {
+        type: String,
+        enum: [
+            "Picked",
+            "Reached_Source_Branch",
+            "Reached_Source_Hub",
+            "In Transit",
+            "Reached_Destination_Hub",
+            "Reached_Destination_Branch",
+            "Pending",
+            "Out_For_Delivery",
+            "Delivered",
+            "Cancelled",
+        ],
+    },
+});
+
+// Define the Order reference schema
+const orderReferenceSchema = new Schema({
+
     items: [itemSchema],  // List of items in the order
 });
 

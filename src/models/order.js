@@ -76,6 +76,7 @@ const orderSchema = new mongoose.Schema(
         "Out_For_Delivery",
         "Delivered",
         "Cancelled",
+        "Manifested"
       ],
       default: "Picked",
     },
@@ -112,6 +113,7 @@ const orderSchema = new mongoose.Schema(
             "Out_For_Delivery",
             "Delivered",
             "Cancelled",
+            "Manifested"
           ],
           default: "Picked",
         },

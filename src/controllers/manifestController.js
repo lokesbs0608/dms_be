@@ -76,21 +76,59 @@ const createManifest = async (req, res) => {
 
 const getAllManifests = async (req, res) => {
     try {
-        const manifests = await Manifest.find().populate(
-            "loaderId sourceHubID destinationHubID",
-        );
-        if (!manifests.length) {
-            return res.status(200).json(manifests);
+        let query = {}; // Initialize an empty query object
+
+        // Extract query parameters from request
+        const {
+            loaderId,
+            sourceHubID,
+            destinationHubID,
+            vehicleNumber,
+            status,
+            transport_type,
+            estimatedDeliveryDate,
+            orderDocketNumber, // To filter by a specific order’s docket number
+            orderStatus, // To filter orders by status
+        } = req.query;
+
+        // Apply filters based on query parameters
+        if (loaderId) query.loaderId = loaderId;
+        if (sourceHubID) query.sourceHubID = sourceHubID;
+        if (destinationHubID) query.destinationHubID = destinationHubID;
+        if (vehicleNumber) query.vehicleNumber = vehicleNumber;
+        if (status) query.status = status;
+        if (transport_type) query.transport_type = transport_type;
+        if (estimatedDeliveryDate) {
+            query.estimatedDeliveryDate = { $gte: new Date(estimatedDeliveryDate) };
         }
+
+        // Order-based filtering inside the `orderIDs` array
+        if (orderDocketNumber || orderStatus) {
+            query.orderIDs = { $elemMatch: {} };
+            if (orderDocketNumber) {
+                query.orderIDs.$elemMatch.docketNumber = orderDocketNumber;
+            }
+            if (orderStatus) {
+                query.orderIDs.$elemMatch["items.status"] = orderStatus;
+            }
+        }
+
+        console.log(query)
+
+        // Fetch manifests with applied filters and populate references
+        const manifests = await Manifest.find(query).populate(
+            "loaderId sourceHubID destinationHubID"
+        );
 
         return res.status(200).json(manifests);
     } catch (error) {
         console.error(error);
-        return res
-            .status(500)
-            .json({ message: "Error fetching manifests", error: error.message });
+        return res.status(500).json({ message: "Error fetching manifests", error: error.message });
     }
 };
+
+module.exports = { getAllManifests };
+
 
 const updateManifest = async (req, res) => {
     try {

@@ -252,7 +252,6 @@ const changeOrderStatus = async (req, res) => {
 };
 
 // Controller to filter orders based on various criteria
-// Controller to filter orders based on various criteria
 const filterOrders = async (req, res) => {
     try {
         const {

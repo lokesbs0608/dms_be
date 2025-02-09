@@ -14,7 +14,7 @@ const login = async (req, res) => {
         const employee = await Employee.findOne({ username });
 
         if (!employee) {
-            return res.status(400).json({ message: "Invalid username or password" });
+            return res.status(400).json({ message: "Invalid username" });
         }
 
         // Check if employee is active
@@ -25,7 +25,7 @@ const login = async (req, res) => {
         // Compare password
         const isMatch = await employee.comparePassword(password);
         if (!isMatch) {
-            return res.status(400).json({ message: "Invalid username or password" });
+            return res.status(400).json({ message: "Invalid password" });
         }
 
         // Generate JWT token

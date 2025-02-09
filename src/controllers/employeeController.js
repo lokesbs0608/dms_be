@@ -1,4 +1,5 @@
 const Employee = require("../models/employee");
+const bcrypt = require("bcryptjs");
 
 // Create Employee
 const createEmployee = async (req, res) => {
@@ -46,22 +47,19 @@ const createEmployee = async (req, res) => {
 const updateEmployee = async (req, res) => {
     try {
         const { id } = req.params;
-        const updatedData = { ...req.body };
+        let { password, ...updatedData } = req.body;
 
-        // Restrict access based on roles
         if (req.user.role !== "super_admin" && req.user.role !== "admin") {
             return res.status(403).json({
-                message:
-                    "Access Denied. Only Super Admin or Admin can update an employee.",
+                message: "Access Denied. Only Super Admin or Admin can update an employee.",
             });
         }
 
-        // Remove the password field if present in the request body
-        if (updatedData.password) {
-            delete updatedData.password;
+        // If a new password is provided, hash it before updating
+        if (password) {
+            updatedData.password = await bcrypt.hash(password, 10);
         }
 
-        // Update the employee
         const employee = await Employee.findByIdAndUpdate(
             id,
             { ...updatedData, updated_by: req.user.id },
@@ -81,6 +79,7 @@ const updateEmployee = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 
 // archive Employee
@@ -146,16 +145,20 @@ const unarchiveEmployee = async (req, res) => {
 
 // Get Employee by ID
 const getEmployeeById = async (req, res) => {
-    if (req.user.role !== "super_admin" && req.user.role !== "admin") {
-        return res.status(403).json({
-            message: "Access Denied. Only Super Admin or Admin can view an employee.",
-        });
-    }
     try {
+        if (req.user.role !== "super_admin" && req.user.role !== "admin") {
+            return res.status(403).json({
+                message: "Access Denied. Only Super Admin or Admin can view an employee.",
+            });
+        }
+
         const { id } = req.params;
-        const employee = await Employee.findById(id).select("-password"); // Exclude password
-        if (!employee)
+        const employee = await Employee.findById(id);
+
+        if (!employee) {
             return res.status(404).json({ message: "Employee not found" });
+        }
+
         res.status(200).json({ employee });
     } catch (error) {
         console.error(error);

@@ -67,8 +67,8 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: [
         "Picked",
-        "Reached_Source_Branch",
-        "Reached_Source_Hub",
+        "Reached Source Branch",
+        "Reached Source Hub",
         "In Transit",
         "Reached Destination Hub",
         "Reached Destination Branch",

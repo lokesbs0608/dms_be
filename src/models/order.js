@@ -73,7 +73,7 @@ const orderSchema = new mongoose.Schema(
         "Reached Destination Hub",
         "Reached Destination Branch",
         "Pending",
-        "Out_For_Delivery",
+        "Out For Delivery",
         "Delivered",
         "Cancelled",
         "Manifested"
@@ -140,7 +140,7 @@ const orderSchema = new mongoose.Schema(
     },
     drsId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Customer",
+      ref: "DRS",
     },
     created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },

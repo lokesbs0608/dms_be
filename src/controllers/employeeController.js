@@ -197,8 +197,8 @@ const getFilteredEmployees = async (req, res) => {
         // If no employees are found
         if (employees.length === 0) {
             return res
-                .status(404)
-                .json({ message: "No employees found with the provided filters." });
+                .status(201)
+                .json({ message: "No employees found with the provided filters.", employees: [] });
         }
 
         // Respond with the filtered employees

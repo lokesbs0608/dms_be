@@ -19,6 +19,7 @@ const routesRoutes = require("./routes/routesRoutes");
 const organizationRoutes = require("./routes/organizationRoutes");
 const batchRoutes = require("./routes/batchRoutes");
 const manifestRoutes = require("./routes/manifestRoutes");
+const drsRoutes = require("./routes/drsRoutes");
 
 dotenv.config();
 
@@ -71,6 +72,7 @@ app.use("/api/routes", routesRoutes);
 app.use("/api/organization", organizationRoutes);
 app.use("/api/batch", batchRoutes);
 app.use("/api/manifest", manifestRoutes);
+app.use("/api/drs", drsRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

@@ -73,7 +73,7 @@ const orderSchema = new mongoose.Schema(
         "Reached Destination Hub",
         "Reached Destination Branch",
         "Pending",
-        "Out For Delivery",
+        "Out for Delivery",
         "Delivered",
         "Cancelled",
         "Manifested"
@@ -104,13 +104,13 @@ const orderSchema = new mongoose.Schema(
           type: String,
           enum: [
             "Picked",
-            "Reached_Source_Branch",
-            "Reached_Source_Hub",
+            "Reached Source Branch",
+            "Reached Source Hub",
             "In Transit",
-            "Reached_Destination_Hub",
-            "Reached_Destination_Branch",
+            "Reached Destination Hub",
+            "Reached Destination Branch",
             "Pending",
-            "Out_For_Delivery",
+            "Out for Delivery",
             "Delivered",
             "Cancelled",
             "Manifested"
@@ -141,6 +141,9 @@ const orderSchema = new mongoose.Schema(
     drsId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "DRS",
+    },
+    amount: {
+      type: String,
     },
     created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },

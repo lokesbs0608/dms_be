@@ -107,7 +107,7 @@ exports.getAllDRS = async (req, res) => {
             .populate("updated_by", "name")
             .populate({
                 path: "orderIds",
-                select: "docket_number consignee items",
+                select: "docketNumber consignee items payment_method amount",
                 populate: [
                     { path: "consignee", select: "name phone address" },
                     { path: "items", select: "weight" },

@@ -1,6 +1,7 @@
 const Customer = require("../models/customer");
 const transporter = require("../config/transporter");
-
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const createCustomer = async (req, res) => {
     try {
         const { name, address, company_name, account_id, documents, email, contacts, password } = req.body;
@@ -34,8 +35,6 @@ const updateCustomer = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = { ...req.body };
-
-        console.log(req?.user, '??????');
         updates.updated_by = req?.user?.id;
 
         // Find the customer first
@@ -139,7 +138,7 @@ const forgotPassword = async (req, res) => {
         // Set OTP and expiration in the database
         customer.resetOtp = otp;
         customer.resetOtpExpiration = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
- 
+
 
         await customer.save();
 
@@ -177,7 +176,7 @@ const resetCustomerPassword = async (req, res) => {
         customer.password = newPassword;
         customer.resetOtp = null;
         customer.resetOtpExpiration = null;
-    
+
         await customer.save();
 
         res.status(200).json({ message: "Password reset successful" });
@@ -229,9 +228,12 @@ const loginCustomer = async (req, res) => {
             return res.status(400).json({ message: "Invalid username or password" });
         }
 
-        const token = jwt.sign({ id: customer._id, type: customer.type }, process.env.JWT_SECRET, { expiresIn: "15d" });
+        const token = jwt.sign({ id: customer._id, type: customer.type, }, process.env.JWT_SECRET, { expiresIn: "100d" });
+        // Convert employee document to object and remove password
+        const user = customer.toObject();
+        delete user.password;
 
-        res.status(200).json({ message: "Login successful", token });
+        res.status(200).json({ message: "Login successful", token, user });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });

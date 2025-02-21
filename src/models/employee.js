@@ -26,6 +26,7 @@ const employeeSchema = new mongoose.Schema(
         remarks: { type: String },
         created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
         updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
+        type: { type: String, default: "employee" },
     },
     { timestamps: true }
 

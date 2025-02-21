@@ -34,6 +34,9 @@ const login = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "15d" }
         );
+        // Convert employee document to object and remove password
+        const user = employee.toObject();
+        delete user.password;
 
         res.status(200).json({ message: "Login successful", token, user: employee });
     } catch (error) {

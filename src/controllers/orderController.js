@@ -264,8 +264,8 @@ const filterOrders = async (req, res) => {
             docketNumber,
             created_by,
             delivered_by,
-            consignor_id,
-            consignee_id,
+            consignorId,
+            consigneeId,
             consignor_name,
             consignee_name,
             payment_method,
@@ -320,13 +320,13 @@ const filterOrders = async (req, res) => {
         }
 
         // Filter by consignor ID if provided
-        if (consignor_id) {
-            filterConditions.consignor_id = consignor_id;
+        if (consignorId) {
+            filterConditions.consignorId = consignorId;
         }
 
         // Filter by consignee ID if provided
-        if (consignee_id) {
-            filterConditions.consignee_id = consignee_id;
+        if (consigneeId) {
+            filterConditions.consigneeId = consigneeId;
         }
 
         // Filter by consignor name if provided

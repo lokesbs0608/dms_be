@@ -76,7 +76,8 @@ const orderSchema = new mongoose.Schema(
         "Out for Delivery",
         "Delivered",
         "Cancelled",
-        "Manifested"
+        "Manifested",
+        "RTO"
       ],
       default: "Picked",
     },
@@ -113,7 +114,8 @@ const orderSchema = new mongoose.Schema(
             "Out for Delivery",
             "Delivered",
             "Cancelled",
-            "Manifested"
+            "Manifested",
+            "RTO"
           ],
           default: "Picked",
         },
@@ -136,7 +138,6 @@ const orderSchema = new mongoose.Schema(
     },
     pickedVehicleNumber: {
       type: String,
-      required: true,
     },
     drsId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -145,8 +146,15 @@ const orderSchema = new mongoose.Schema(
     amount: {
       type: String,
     },
+    pickup_date: {
+      type: Date, default: null
+    },
+    delivery_date: {
+      type: Date, default: null
+    },
     created_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
     updated_by: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", default: null },
+    docket_url: { type: String },
   },
   {
     timestamps: true,

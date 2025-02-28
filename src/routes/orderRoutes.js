@@ -29,4 +29,6 @@ router.put("/status/:id", authenticate, orderController.changeOrderStatus);
 // Filter orders
 router.get("/", authenticate, orderController.filterOrders);
 
+router.patch("/:id/docket", orderController.updateDocketUrl);
+
 module.exports = router;

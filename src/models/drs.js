@@ -35,6 +35,11 @@ const drsSchema = new mongoose.Schema(
             ref: "Employee",
             default: null,
         },
+        code: {
+            type: String,
+            unique: true,
+            required: true,
+        }
     },
     { timestamps: true }
 );

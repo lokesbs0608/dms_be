@@ -3,6 +3,10 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const db = require("./config/db");
 const rateLimit = require("express-rate-limit");
+const path = require("path");
+
+
+
 
 // routes imports
 const authRoutes = require("./routes/authRoutes");
@@ -20,7 +24,7 @@ const organizationRoutes = require("./routes/organizationRoutes");
 const batchRoutes = require("./routes/batchRoutes");
 const manifestRoutes = require("./routes/manifestRoutes");
 const drsRoutes = require("./routes/drsRoutes");
-
+const uploadRoutes = require("./routes/uploadRoutes");
 dotenv.config();
 
 const app = express();
@@ -53,9 +57,17 @@ db();
 // app.use(apiLimiter);
 
 // Test Route
+
+
+// Make uploads folder publicly accessible
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+
 app.get("/", (req, res) => {
     res.send("API is running...");
 });
+
+
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -73,6 +85,7 @@ app.use("/api/organization", organizationRoutes);
 app.use("/api/batch", batchRoutes);
 app.use("/api/manifest", manifestRoutes);
 app.use("/api/drs", drsRoutes);
+app.use("/api/upload-image", uploadRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

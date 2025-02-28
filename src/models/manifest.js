@@ -83,6 +83,11 @@ const manifestSchema = new Schema(
             ref: "User", // Reference to the User model
         },
         issueStatus: { type: String },
+        code: {
+            type: String,
+            unique: true,
+            required: true,
+        }
     },
     { timestamps: true } // Automatically manage createdAt and updatedAt fields
 );

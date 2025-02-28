@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Manifest = require("../models/manifest"); // Adjust the path as necessary
 const Order = require("../models/order"); // Assuming you have an Order model
+const Hub = require("../models/hub");;
 
 const createManifest = async (req, res) => {
     try {
@@ -14,12 +15,46 @@ const createManifest = async (req, res) => {
             driverContactNumber,
             orderIDs,
             status,
+            transport_type
         } = req.body;
 
         if (!Array.isArray(orderIDs) || orderIDs.length === 0) {
             return res
                 .status(400)
                 .json({ message: "orderIDs must be a non-empty array." });
+        }
+
+        // Fetch the source hub details
+        const sourceHub = await Hub.findById(sourceHubID);
+        if (!sourceHub) {
+            return res.status(400).json({ message: "Invalid source hub ID." });
+        }
+
+        const hubPrefix = sourceHub.name.substring(0, 3).toUpperCase();
+
+        // Fetch the last created manifest for this hub
+        const lastManifest = await Manifest.findOne({ code: new RegExp(`^${hubPrefix}`) })
+            .sort({ code: -1 });
+
+        let newManifestNumber;
+
+        if (!lastManifest) {
+            newManifestNumber = `${hubPrefix}A000001`;
+        } else {
+            const lastManifestNumber = lastManifest.manifestNumber; // Example: "BLRA000123"
+            const letterPart = lastManifestNumber.charAt(3); // Extract "A"
+            const numericPart = parseInt(lastManifestNumber.substring(4)); // Extract "000123" -> 123
+
+            if (numericPart < 999999) {
+                newManifestNumber = `${hubPrefix}${letterPart}${String(numericPart + 1).padStart(6, "0")}`;
+            } else {
+                // Move to the next letter (A -> B, B -> C, ..., Z -> reset or handle accordingly)
+                const nextLetter = String.fromCharCode(letterPart.charCodeAt(0) + 1);
+                if (nextLetter > "Z") {
+                    return res.status(400).json({ message: "Series limit reached." });
+                }
+                newManifestNumber = `${hubPrefix}${nextLetter}000001`;
+            }
         }
 
         // Create the manifest
@@ -31,11 +66,12 @@ const createManifest = async (req, res) => {
             gpsLocation,
             estimatedDeliveryDate,
             driverContactNumber,
+            transport_type,
             orderIDs,
             createdBy: req?.user?.id,
             updatedBy: req?.user?.id,
             status: status || "Pending",
-            ...req?.body,
+            code: newManifestNumber, // Assign generated number
         });
 
         await newManifest.save();
@@ -127,7 +163,6 @@ const getAllManifests = async (req, res) => {
     }
 };
 
-module.exports = { getAllManifests };
 
 
 const updateManifest = async (req, res) => {

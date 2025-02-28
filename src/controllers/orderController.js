@@ -1,5 +1,6 @@
 const Order = require("../models/order"); // Assuming the model is in the 'models' folder
 const Customer = require("../models/customer"); // Assuming the model is in the 'models' folder
+const { default: mongoose } = require("mongoose");
 
 // Controller to create an order
 const createOrder = async (req, res) => {
@@ -8,7 +9,10 @@ const createOrder = async (req, res) => {
         orderData.updated_by = req?.user?.id
         orderData.created_by = req?.user?.id;
         // If consignorId is provided, fetch and update consignor details
-        if (orderData.consignorId) {
+        if (orderData.consignorId && orderData.consignorId.trim() !== "") {
+            if (!mongoose.Types.ObjectId.isValid(orderData.consignorId)) {
+                return res.status(400).json({ message: "Invalid Consignor ID format" });
+            }
             const consignor = await Customer.findById(orderData.consignorId);
             if (!consignor) {
                 return res.status(400).json({ message: "Consignor not found" });
@@ -22,10 +26,15 @@ const createOrder = async (req, res) => {
                 pincode: consignor.pincode || "",
                 number: consignor.number || "",
             };
+        } else {
+            delete orderData.consignorId; // Remove empty string to prevent type casting error
         }
 
         // If consigneeId is provided, fetch and update consignee details
-        if (orderData.consigneeId) {
+        if (orderData.consigneeId && orderData.consigneeId.trim() !== "") {
+            if (!mongoose.Types.ObjectId.isValid(orderData.consigneeId)) {
+                return res.status(400).json({ message: "Invalid Consignee ID format" });
+            }
             const consignee = await Customer.findById(orderData.consigneeId);
             if (!consignee) {
                 return res.status(400).json({ message: "Consignee not found" });
@@ -39,7 +48,10 @@ const createOrder = async (req, res) => {
                 pincode: consignee.pincode || "",
                 number: consignee.number || "",
             };
+        } else {
+            delete orderData.consigneeId; // Remove empty string to prevent type casting error
         }
+
         const findOrder = await Order.findOne({ docketNumber: orderData?.docketNumber });
 
         if (findOrder) {
@@ -380,6 +392,38 @@ const getOrderById = async (req, res) => {
     }
 };
 
+const updateDocketUrl = async (req, res) => {
+    try {
+        const { id } = req.params; // Extract order ID from params
+        const { docket_url } = req.body; // Extract docket_url from request body
+
+        if (!docket_url) {
+            return res.status(400).json({ message: "docket_url is required" });
+        }
+
+        // Find and update the order
+        const updatedOrder = await Order.findByIdAndUpdate(
+            id,
+            { docket_url }, // Update only the docket_url field
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "docket_url updated successfully!",
+        });
+
+    } catch (error) {
+        console.error("Error updating docket_url:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
 module.exports = {
     createOrder,
     updateOrder,
@@ -388,5 +432,6 @@ module.exports = {
     addHistoryToOrder,
     changeOrderStatus,
     filterOrders,
-    getOrderById
+    getOrderById,
+    updateDocketUrl
 };

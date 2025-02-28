@@ -1,12 +1,12 @@
 const DRS = require("../models/drs");
 const Order = require("../models/order");
 const mongoose = require("mongoose");
+const Hub = require("../models/hub");
 
-// Create a new DRS record
 // Create a new DRS record
 exports.createDRS = async (req, res) => {
     try {
-        const { orderIds, ...drsData } = req.body;
+        const { orderIds, hubId, ...drsData } = req.body;
 
         if (!Array.isArray(orderIds) || orderIds.length === 0) {
             return res.status(400).json({
@@ -25,8 +25,42 @@ exports.createDRS = async (req, res) => {
             });
         }
 
+        // Fetch the source hub details
+        const sourceHub = await Hub.findById(hubId);
+        if (!sourceHub) {
+            return res.status(400).json({ message: "Invalid source hub ID." });
+        }
+
+        const hubPrefix = sourceHub.name.substring(0, 3).toUpperCase();
+
+
+        // Fetch the last created manifest for this hub
+        const lastDrs = await DRS.findOne({ code: new RegExp(`^${hubPrefix}`) })
+            .sort({ code: -1 });
+
+        let newDrsNumber;
+
+        if (!lastDrs) {
+            newDrsNumber = `${hubPrefix}A000001`;
+        } else {
+            const lastDrsNumber = lastDrs.manifestNumber; // Example: "BLRA000123"
+            const letterPart = lastDrsNumber.charAt(3); // Extract "A"
+            const numericPart = parseInt(lastDrsNumber.substring(4)); // Extract "000123" -> 123
+
+            if (numericPart < 999999) {
+                newDrsNumber = `${hubPrefix}${letterPart}${String(numericPart + 1).padStart(6, "0")}`;
+            } else {
+                // Move to the next letter (A -> B, B -> C, ..., Z -> reset or handle accordingly)
+                const nextLetter = String.fromCharCode(letterPart.charCodeAt(0) + 1);
+                if (nextLetter > "Z") {
+                    return res.status(400).json({ message: "Series limit reached." });
+                }
+                newDrsNumber = `${hubPrefix}${nextLetter}000001`;
+            }
+        }
+
         // Create the DRS entry
-        const drs = await DRS.create({ ...drsData, orderIds });
+        const drs = await DRS.create({ ...drsData, hubId, code: newDrsNumber, orderIds });
 
         // Update order status, items status, and set DRS ID in each order
         await Order.updateMany(
@@ -149,19 +183,23 @@ exports.getAllDRS = async (req, res) => {
 // Get a single DRS by ID
 exports.getDRSById = async (req, res) => {
     try {
-        const drs = await DRS.findById(req.params.id)
-            .populate("hubId", "name")
-            .populate("deliveryBoyId", "name")
-            .populate("orderIds._id", "docket_number");
+        const drs = await DRS.findById(req.params.id).populate({
+            path: "orderIds", // Populate order details
+            select: "_id docketNumber", // Select only required fields
+        });
 
         if (!drs) {
             return res.status(404).json({ success: false, message: "DRS not found" });
         }
-        res.status(200).json({ success: true, drs });
+
+
+
+        res.status(200).json({ success: true, drs: { ...drs._doc, } });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 // Update a DRS record
 exports.updateDRS = async (req, res) => {
@@ -176,7 +214,7 @@ exports.updateDRS = async (req, res) => {
 
         res
             .status(200)
-            .json({ success: true, message: "DRS updated successfully", updatedDRS });
+            .json({ success: true, message: "DRS updated successfully", });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -200,74 +238,43 @@ exports.deleteDRS = async (req, res) => {
 };
 
 exports.removeOrderFromDRS = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
-        const { drsId, orderId } = req.body;
+        const { drsId, orderId } = req.query;  // Extract from query params
 
-        if (!drsId || !orderId) {
-            return res.status(400).json({
-                success: false,
-                message: "DRS ID and Order ID are required.",
-            });
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(drsId) || !mongoose.Types.ObjectId.isValid(orderId)) {
+            return res.status(400).json({ success: false, message: "Invalid DRS ID or Order ID." });
         }
 
-        // Check if DRS exists
-        const drs = await DRS.findById(drsId).session(session);
+        // Convert IDs to ObjectId
+        const drsObjectId = new mongoose.Types.ObjectId(drsId);
+        const orderObjectId = new mongoose.Types.ObjectId(orderId);
+
+        // Find DRS
+        const drs = await DRS.findById(drsObjectId);
         if (!drs) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(404).json({
-                success: false,
-                message: "DRS not found.",
-            });
+            return res.status(404).json({ success: false, message: "DRS not found." });
         }
 
         // Check if the order exists inside DRS
         const orderExists = drs.orderIds.some(order => order._id.toString() === orderId);
         if (!orderExists) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(404).json({
-                success: false,
-                message: "Order ID not found in this DRS.",
-            });
+            return res.status(404).json({ success: false, message: "Order ID not found in this DRS." });
         }
 
-        // Remove Order ID from DRS document
-        await DRS.findByIdAndUpdate(
-            drsId,
-            { $pull: { orderIds: { _id: orderId } } },
-            { session }
-        );
+        // Remove Order ID from DRS
+        await DRS.findByIdAndUpdate(drsObjectId, { $pull: { orderIds: orderObjectId } });
 
-        // Update Order status and its items status to "Reached Destination"
+        // Update Order status
         await Order.updateOne(
-            { _id: orderId },
-            {
-                $set: {
-                    status: "Reached Destination",
-                    "items.$[elem].status": "Reached Destination",
-                },
-            },
-            {
-                session,
-                arrayFilters: [{ "elem.status": { $ne: "Reached Destination" } }], // Only update if status is different
-            }
+            { _id: orderObjectId },
+            { $set: { status: "Reached Destination Hub", "items.$[elem].status": "Reached Destination Hub" } },
+            { arrayFilters: [{ "elem.status": { $ne: "Reached Destination" } }] }
         );
 
-        await session.commitTransaction();
-        session.endSession();
-
-        res.status(200).json({
-            success: true,
-            message: "Order removed from DRS and updated to 'Reached Destination'.",
-        });
+        res.status(200).json({ success: true, message: "Order removed from manifest and status updated successfully." });
 
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
         res.status(500).json({ success: false, message: error.message });
     }
 };

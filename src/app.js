@@ -43,10 +43,10 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000; // Default port is 5000 if not set in environment variables
 
+
+createSuperAdmin();
 // Database connection
 db();
-createSuperAdmin();
-
 // // Rate Limiter Configuration
 // const apiLimiter = rateLimit({
 //     windowMs: 15 * 60 * 1000, // 15 minutes

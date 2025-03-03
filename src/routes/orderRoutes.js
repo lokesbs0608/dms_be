@@ -27,7 +27,7 @@ router.post("/history/:id", authenticate, orderController.addHistoryToOrder);
 router.put("/status/:id", authenticate, orderController.changeOrderStatus);
 
 // Filter orders
-router.get("/", authenticate, orderController.filterOrders);
+router.get("/",  orderController.filterOrders);
 
 router.patch("/:id/docket", orderController.updateDocketUrl);
 

@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const Employee = require('./models/Employee'); // Adjust the path to your Employee model
-export const createSuperAdmin = async () => {
+const bcrypt = require("bcryptjs");
+const Employee = require('../models/employee'); // Adjust the path to your Employee model
+
+const createSuperAdmin = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -9,7 +10,7 @@ export const createSuperAdmin = async () => {
 
         if (existingUser) {
             console.log('Super Admin already exists.');
-            process.exit();
+            return; // ✅ No exit, just return
         }
 
         const hashedPassword = await bcrypt.hash('8553871265@Speedo', 10);
@@ -21,12 +22,6 @@ export const createSuperAdmin = async () => {
             email: 'manigowda00@gmail.com',
             password: hashedPassword,
             role: 'super_admin',
-            location: {
-                address: '123 Admin Street',
-                city: 'Admin City',
-                state: 'Admin State',
-                pincode: '123456',
-            },
             status: 'Active',
             section: 'Management',
             account_id: null,
@@ -37,10 +32,9 @@ export const createSuperAdmin = async () => {
         console.log('Super Admin created successfully!');
     } catch (error) {
         console.error('Error creating Super Admin:', error.message);
-    } finally {
-        mongoose.connection.close();
-        process.exit();
     }
 };
 
-
+module.exports = {
+    createSuperAdmin
+};

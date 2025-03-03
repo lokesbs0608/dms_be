@@ -25,6 +25,7 @@ const batchRoutes = require("./routes/batchRoutes");
 const manifestRoutes = require("./routes/manifestRoutes");
 const drsRoutes = require("./routes/drsRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const { createSuperAdmin } = require("./helpers/createSuperAdmin");
 dotenv.config();
 
 const app = express();
@@ -44,6 +45,7 @@ const PORT = process.env.PORT || 5000; // Default port is 5000 if not set in env
 
 // Database connection
 db();
+createSuperAdmin();
 
 // // Rate Limiter Configuration
 // const apiLimiter = rateLimit({

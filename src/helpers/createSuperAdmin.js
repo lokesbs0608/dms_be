@@ -1,6 +1,18 @@
-const createSuperAdmin = async () => {
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const Employee = require('./models/Employee'); // Adjust the path to your Employee model
+export const createSuperAdmin = async () => {
     try {
-        const hashedPassword = await bcrypt.hash('8553871265@Speedo', 10);  // Password to be hashed
+        await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+
+        const existingUser = await Employee.findOne({ username: 'manigowda00@gmail.com' });
+
+        if (existingUser) {
+            console.log('Super Admin already exists.');
+            process.exit();
+        }
+
+        const hashedPassword = await bcrypt.hash('8553871265@Speedo', 10);
 
         const superAdmin = new Employee({
             name: 'Manikanta Gowda (Super Admin)',
@@ -17,17 +29,18 @@ const createSuperAdmin = async () => {
             },
             status: 'Active',
             section: 'Management',
-            account_id: null,  // You can update this if needed
-            documents_id: [],  // Add any document references
+            account_id: null,
+            documents_id: [],
         });
 
         await superAdmin.save();
         console.log('Super Admin created successfully!');
-        process.exit();
     } catch (error) {
         console.error('Error creating Super Admin:', error.message);
-        process.exit(1);
+    } finally {
+        mongoose.connection.close();
+        process.exit();
     }
 };
 
-createSuperAdmin();
+

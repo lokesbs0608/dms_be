@@ -13,17 +13,21 @@ const createSuperAdmin = async () => {
             return; // ✅ No exit, just return
         }
 
-        const hashedPassword = await bcrypt.hash('8553871265@Speedo', 10);
-
         const superAdmin = new Employee({
             name: 'Manikanta Gowda (Super Admin)',
             gender: 'Male',
             username: 'manigowda00@gmail.com',
             email: 'manigowda00@gmail.com',
-            password: hashedPassword,
+            password: '8553871265@Speedo',
             role: 'super_admin',
             status: 'Active',
             section: 'Management',
+            location: {
+                address: '123 Admin Street',
+                city: 'Admin City',
+                state: 'Admin State',
+                pincode: '123456',
+            },
             account_id: null,
             documents_id: [],
         });

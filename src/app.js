@@ -32,7 +32,7 @@ const app = express();
 
 // CORS configuration for localhost:3000
 const corsOptions = {
-    origin: "http://localhost:3000", // Allow only this origin
+    origin: ["http://localhost:3000", "https://admin.speedooneexpress.com"], // Allow only this origin
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allow specific HTTP methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
 };
@@ -44,9 +44,11 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000; // Default port is 5000 if not set in environment variables
 
 
-createSuperAdmin();
+
 // Database connection
 db();
+
+createSuperAdmin();
 // // Rate Limiter Configuration
 // const apiLimiter = rateLimit({
 //     windowMs: 15 * 60 * 1000, // 15 minutes
